@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atención · 2000—2026 · Entretenimiento y publicidad</title>
 <meta name="description" content="Veintiséis años de industria del entretenimiento y sus modelos publicitarios, del rating televisivo a la atención sintética.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://unpkg.com">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
 
@@ -27,7 +32,19 @@
 
     /* Geometría del margen editorial */
     --gutter: 60px;
+
+    /* Escala tipográfica fluida.
+       Clave: el límite se toma de `min(vw, vh)`. El fallo original venía de
+       fijar 116px por ancho: en una pantalla de 1328×568 el título medía lo
+       mismo que en un monitor alto y se comía el panel de datos. Al acotar
+       también por altura, el titular cede espacio en viewports apaisados. */
+    --fs-display: clamp(34px, min(6.6vw, 12.5vh), 104px);  /* portada */
+    --fs-title:   clamp(30px, min(5.6vw, 10.5vh), 88px);   /* títulos de era */
+    --fs-body:    clamp(13px, min(1.05vw, 2.6vh), 16px);
+    --fs-stand:   clamp(14px, min(1.15vw, 2.9vh), 17px);
 }
+
+html { color-scheme: dark; }
 
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
@@ -176,6 +193,23 @@ a:focus-visible, button:focus-visible {
     border-radius: 2px;
 }
 
+/* Velo de legibilidad. El texto editorial cae sobre un modelo 3D iluminado por
+   una luz de 18 de intensidad: sin este degradado hay tramos donde el texto
+   claro queda sobre metal claro. Se sitúa entre el canvas (z 1) y la
+   rejilla (z 5), así que oscurece el fondo sin apagar la interfaz. */
+.hero-stage::before {
+    content: '';
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    height: 62vh;
+    background: linear-gradient(to top,
+        rgba(0, 0, 0, 0.82) 0%,
+        rgba(0, 0, 0, 0.52) 34%,
+        rgba(0, 0, 0, 0) 100%);
+    z-index: 4;
+    pointer-events: none;
+}
+
 /* ---------------- portada del hero ---------------- */
 /* Vive sobre el escenario 3D: el televisor de tubo ya está encendido
    detrás del titular antes de que empiece el recorrido. */
@@ -198,17 +232,21 @@ a:focus-visible, button:focus-visible {
 }
 .cover-title {
     font-family: 'Italiana', serif;
-    font-size: clamp(46px, 7.6vw, 132px);
+    font-size: var(--fs-display);
     line-height: 0.95;
     font-weight: 400;
     letter-spacing: 2px;
     color: #fff6ed;
-    margin-bottom: 30px;
+    margin-bottom: clamp(14px, 2.4vh, 30px);
+    text-wrap: balance;
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.75);
 }
 .cover-standfirst {
-    font-size: 17px; line-height: 1.65; font-weight: 300;
+    font-size: var(--fs-stand); line-height: 1.65; font-weight: 300;
     color: #d1d5db; letter-spacing: 0.4px;
     max-width: 46ch;
+    text-wrap: pretty;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
     opacity: 0; transform: translateY(24px);
     transition: opacity var(--dur-text) var(--ease-editorial),
                 transform var(--dur-text) var(--ease-editorial);
@@ -291,16 +329,22 @@ a:focus-visible, button:focus-visible {
 
 .slide-title {
     font-family: 'Italiana', serif;
-    font-size: 116px;
+    font-size: var(--fs-title);
     line-height: 1.0;
     font-weight: 400;
     letter-spacing: 2px;
-    margin-bottom: 20px;
+    margin-bottom: clamp(10px, 1.6vh, 20px);
     color: #fff6ed;
+    text-wrap: balance;
+    /* El titular flota sobre un modelo 3D iluminado: sin sombra propia hay
+       tramos donde el texto claro cae sobre metal claro. */
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.75);
 }
 .slide-desc {
-    font-size: 16px; line-height: 1.7; font-weight: 300;
+    font-size: var(--fs-body); line-height: 1.7; font-weight: 300;
     color: #d1d5db; letter-spacing: 0.5px;
+    text-wrap: pretty;
+    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
@@ -371,9 +415,11 @@ a:focus-visible, button:focus-visible {
 }
 #slide-3 .slide-title { white-space: nowrap; }
 
-#slide-4 { left: calc(25% + 40px); max-width: 600px; }
+#slide-4 { left: calc(25% + 40px); max-width: min(46vw, 600px); }
 
-#slide-5 { left: 60px; max-width: 620px; }
+/* slide-5 ocupaba la columna 1, la misma que el panel de datos: en viewports
+   cortos el titular subía hasta cruzarse con él. Se mueve a la columna 2. */
+#slide-5 { left: calc(25vw + 40px); max-width: min(46vw, 620px); }
 
 /* ---------------- monitor (panel de inversión publicitaria) ---------------- */
 .monitor {
@@ -434,10 +480,14 @@ a:focus-visible, button:focus-visible {
 .yt-year {
     font-family: 'IBM Plex Mono', monospace;
     font-weight: 300;
-    font-size: 76px;
+    font-size: clamp(38px, min(4.4vw, 9vh), 76px);
     line-height: 0.9;
     letter-spacing: -1px;
     color: rgba(255, 255, 255, 0.92);
+    /* El año se incrementa dígito a dígito con el scroll: sin ancho tabular
+       la cifra tiembla lateralmente en cada cambio. */
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
 .yt-era {
     margin-top: 12px;
@@ -521,9 +571,14 @@ a:focus-visible, button:focus-visible {
 
 /* ---------------- responsive ---------------- */
 @media (max-width: 1180px) {
-    .slide-title { font-size: 76px; }
-    .yt-year { font-size: 56px; }
+    .yt-year { font-size: clamp(34px, 5vh, 56px); }
     .monitor { max-width: 260px; }
+}
+/* El panel de datos es enriquecimiento, no contenido esencial: por debajo de
+   760px de alto no cabe junto al texto de la era y se retira antes que
+   provocar la colisión. Su información sigue en el texto de cada slide. */
+@media (max-height: 760px) {
+    .monitor { display: none; }
 }
 @media (max-width: 900px) {
     .cinematic-container { padding: 0 24px 30px 24px; }
@@ -706,7 +761,7 @@ a:focus-visible, button:focus-visible {
         <canvas id="monitor-canvas" width="620" height="620"></canvas>
         <div class="monitor-scan"></div>
     </div>
-    <div class="monitor-cap">Reparto de la inversión publicitaria<br>Estimación ilustrativa</div>
+    <div class="monitor-cap">Reparto de la inversión publicitaria mundial<br>2005 y 2026 publicados · tramos intermedios interpolados</div>
 </div>
 
 <div class="year-ticker">
@@ -745,7 +800,8 @@ a:focus-visible, button:focus-visible {
     </div>
 </div>
 
-<canvas id="webgl"></canvas>
+<!-- Decorativo: toda la información que transmite está en el texto de cada era. -->
+<canvas id="webgl" aria-hidden="true"></canvas>
 
 </div><!-- /.hero-stage -->
 </section><!-- /#hero -->
@@ -767,7 +823,9 @@ const ERAS = [
         shell: '#cdbfa4', trim: '#242021', glow: '#ffb14a', accent: '#ff9a2e',
         rim: '#ffd7a3',
         sparkA: '#ff9d2e', sparkB: '#7fe0a8',
-        spend: [42, 34, 18, 5, 0, 1]
+        // TV 37% y periódicos 29.8% del gasto mundial en 2005 (ZenithOptimedia);
+        // internet 3.8%. Revistas incluidas en impresos.
+        spend: [37, 43, 16, 4, 0, 0], sourced: true
     },
     {
         years: '2006 — 2011',
@@ -777,7 +835,7 @@ const ERAS = [
         shell: '#e9e9ea', trim: '#9aa0a6', glow: '#9fd8ff', accent: '#6cc4ff',
         rim: '#dce9ff',
         sparkA: '#ffd98a', sparkB: '#8fd0ff',
-        spend: [40, 24, 15, 17, 3, 1]
+        spend: [38, 33, 15, 13, 1, 0], sourced: false
     },
     {
         years: '2012 — 2017',
@@ -787,7 +845,7 @@ const ERAS = [
         shell: '#3a3d42', trim: '#c8ccd2', glow: '#65f0d4', accent: '#3fe0c0',
         rim: '#c9fff2',
         sparkA: '#ff6bb5', sparkB: '#67f0d8',
-        spend: [35, 15, 11, 22, 12, 5]
+        spend: [36, 17, 13, 25, 7, 2], sourced: false
     },
     {
         years: '2018 — 2022',
@@ -797,7 +855,7 @@ const ERAS = [
         shell: '#1d1e22', trim: '#6e7278', glow: '#ff4fa3', accent: '#ff4fa3',
         rim: '#ffc6e6',
         sparkA: '#ff4fa3', sparkB: '#8f7bff',
-        spend: [24, 8, 8, 27, 21, 12]
+        spend: [22, 8, 10, 34, 18, 8], sourced: false
     },
     {
         years: '2023 — 2026',
@@ -807,7 +865,10 @@ const ERAS = [
         shell: '#24243a', trim: '#8d8ec4', glow: '#a06bff', accent: '#8f6bff',
         rim: '#cdd6ff',
         sparkA: '#a06bff', sparkB: '#5fd8ff',
-        spend: [15, 5, 6, 28, 25, 21]
+        // 2026: digital = 73% del gasto mundial ($740 mM de $1,06 B). Dentro del
+        // digital, buscador 40% y display 18% → 41% del total; social 32% → 23%;
+        // video/CTV 10% más retail media ($62 mM) → 13%. TV lineal ~11%.
+        spend: [11, 4, 8, 41, 23, 13], sourced: true
     }
 ];
 const ERA_COUNT = ERAS.length;
@@ -968,7 +1029,9 @@ function matGlass(glow, intensity) {
         color: new THREE.Color('#05070a'),
         roughness: 0.12, metalness: 0.2,
         emissive: new THREE.Color(glow),
-        emissiveIntensity: intensity || 1.1,
+        // Factor global: las pantallas deben leerse encendidas, no fundidas a
+        // blanco. Se aplica aquí para no repetir el ajuste en cada aparato.
+        emissiveIntensity: (intensity || 1.1) * 0.6,
         transparent: true, opacity: 1
     });
 }
@@ -1457,12 +1520,15 @@ function initScene() {
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 2.2;
+    // 2.2 quemaba los aparatos: las carcasas claras y las pantallas emisivas
+    // saturaban a blanco y el volumen se perdía (el visor se veía como una
+    // mancha plana). 1.35 recupera el modelado y los reflejos metálicos.
+    renderer.toneMappingExposure = 1.35;
 
-    const ambientLight = new THREE.AmbientLight('#ffffff', 0.12);
+    const ambientLight = new THREE.AmbientLight('#ffffff', 0.18);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.SpotLight('#ffffff', 18.0);
+    const keyLight = new THREE.SpotLight('#ffffff', 11.0);
     keyLight.position.set(4, 6, 3);
     keyLight.angle = Math.PI / 4;
     keyLight.penumbra = 0.9;
@@ -1474,15 +1540,15 @@ function initScene() {
     keyLight.shadow.bias = -0.001;
     scene.add(keyLight);
 
-    rimLight = new THREE.DirectionalLight('#ffd7a3', 9.0);
+    rimLight = new THREE.DirectionalLight('#ffd7a3', 5.5);
     rimLight.position.set(-5, 3, -4);
     scene.add(rimLight);
 
-    const fillLight = new THREE.DirectionalLight('#fff3e6', 0.8);
+    const fillLight = new THREE.DirectionalLight('#fff3e6', 0.9);
     fillLight.position.set(-2, -4, 2);
     scene.add(fillLight);
 
-    accentLight = new THREE.PointLight('#ffb14a', 7.0, 9.0);
+    accentLight = new THREE.PointLight('#ffb14a', 4.0, 9.0);
     accentLight.position.set(0, 0.5, 1.8);
     scene.add(accentLight);
 
@@ -1508,6 +1574,9 @@ function splitTitlesIntoChars() {
     const titles = document.querySelectorAll('.slide-title, .cover-title');
     titles.forEach(title => {
         const text = title.innerHTML;
+        // Sin esto, un lector de pantalla deletrea el título letra por letra:
+        // se expone el texto íntegro en aria-label y se oculta el troceado.
+        title.setAttribute('aria-label', title.textContent.replace(/\s+/g, ' ').trim());
         let newHTML = '';
         let delayCounter = 0;
         const parts = text.split(/(<br\s*\/?>)/i);
@@ -1519,7 +1588,7 @@ function splitTitlesIntoChars() {
                     if (part[i] === ' ') {
                         newHTML += ' ';
                     } else {
-                        newHTML += `<span class="char" style="transition-delay: ${delayCounter * 0.035}s">${part[i]}</span>`;
+                        newHTML += `<span class="char" aria-hidden="true" style="transition-delay: ${delayCounter * 0.035}s">${part[i]}</span>`;
                         delayCounter++;
                     }
                 }
@@ -1587,10 +1656,14 @@ function drawMonitor(f) {
         ctx.restore();
     });
 
+    // Se declara en pantalla la procedencia del dato: los extremos de la serie
+    // están publicados, los tramos intermedios son interpolación entre ellos.
+    const era = ERAS[t > 0.5 ? i1 : i0];
     ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.fillStyle = era.sourced ? 'rgba(150,240,200,0.55)' : 'rgba(255,255,255,0.28)';
     ctx.font = '400 13px "IBM Plex Mono", monospace';
-    ctx.fillText('% del gasto global · estimación', padL, H - 30);
+    ctx.fillText(era.sourced ? '% mundial · dato publicado'
+                             : '% mundial · interpolado', padL, H - 30);
 }
 
 /* =========================================================
@@ -1790,7 +1863,7 @@ function animate() {
     if (rimLight) rimLight.color.copy(eraColor('rim', eraF, colA));
     if (accentLight) {
         accentLight.color.copy(eraColor('glow', eraF, colA));
-        accentLight.intensity = 6.0 + Math.sin(time * 1.4) * 0.6;
+        accentLight.intensity = 3.6 + Math.sin(time * 1.4) * 0.4;
     }
 
     // --- partículas ---
