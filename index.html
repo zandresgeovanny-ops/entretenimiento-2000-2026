@@ -1,0 +1,1591 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atención · 2000—2026 · Entretenimiento y publicidad</title>
+<meta name="description" content="Veintiséis años de industria del entretenimiento y sus modelos publicitarios, del rating televisivo a la atención sintética.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+
+html, body {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #000000;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+body {
+    min-height: 900vh;
+    font-family: 'Outfit', sans-serif;
+    color: #ffffff;
+    overflow-x: hidden;
+    cursor: none;
+}
+
+* { cursor: none !important; }
+
+::-webkit-scrollbar { display: none; width: 0; }
+
+#webgl {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    outline: none;
+}
+
+/* ---------------- cursor ---------------- */
+.cursor-inner {
+    position: fixed; top: 0; left: 0;
+    width: 6px; height: 6px;
+    border: 2px solid rgba(255, 255, 255, 1);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9999;
+}
+.cursor-outer {
+    position: fixed; top: 0; left: 0;
+    width: 40px; height: 40px;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 9998;
+    transition: width 0.3s, height 0.3s, background 0.3s;
+}
+
+/* ---------------- overlay ---------------- */
+.cinematic-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 10;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0 60px 40px 60px;
+    box-sizing: border-box;
+}
+
+.main-header {
+    display: flex; justify-content: space-between; align-items: center;
+    width: 100%; z-index: 20;
+    pointer-events: auto;
+    padding: 20px 0;
+}
+.brand-block { display: flex; align-items: baseline; gap: 14px; }
+.brand { font-size: 14px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; }
+.brand-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.4);
+}
+.header-nav { display: flex; align-items: center; gap: 22px; }
+.nav-link {
+    color: rgba(255, 255, 255, 0.65); text-decoration: none;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
+    font-weight: 500; transition: color 0.3s;
+}
+.nav-link:hover, .nav-link.current { color: #ffffff; }
+.nav-dot { width: 3px; height: 3px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; }
+.contact-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 24px;
+    background: #ffffff; color: #000000;
+    text-decoration: none;
+    font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+    border-radius: 20px;
+    transition: transform 0.3s, background 0.3s;
+}
+.btn-circle {
+    display: inline-block; width: 6px; height: 6px;
+    border: 1px solid #000000; border-radius: 50%; background: transparent;
+}
+.contact-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+
+/* ---------------- slides ---------------- */
+.slide { position: absolute; bottom: 12%; pointer-events: none; }
+
+.slide-era {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 18px;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    transition-delay: 0.1s;
+}
+.slide.active .slide-era { opacity: 1; transform: translateY(0); }
+
+.slide-title {
+    font-family: 'Italiana', serif;
+    font-size: 116px;
+    line-height: 1.0;
+    font-weight: 400;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    color: #fff6ed;
+}
+.slide-desc {
+    font-size: 16px; line-height: 1.7; font-weight: 300;
+    color: #d1d5db; letter-spacing: 0.5px;
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    transition-delay: 0.4s;
+}
+.slide.active .slide-desc { opacity: 1; transform: translateY(0); }
+
+.slide-tags {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px;
+    opacity: 0; transform: translateY(20px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    transition-delay: 0.62s;
+}
+.slide.active .slide-tags { opacity: 1; transform: translateY(0); }
+.tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.72);
+    white-space: nowrap;
+}
+
+.slide-title .char {
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(50px);
+    filter: blur(12px);
+    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
+                filter 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.slide.active .slide-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
+.slide.active { pointer-events: auto; }
+
+#slide-1 { left: 0; width: 100%; }
+#slide-1 .slide-era { margin-left: 60px; }
+#slide-1 .slide-title { margin-left: 60px; }
+#slide-1 .desc-row { position: relative; display: flex; width: 100%; }
+#slide-1 .col-1 {
+    margin-left: 60px;
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+#slide-1 .col-2 {
+    position: absolute;
+    left: calc(25vw + 40px);
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+
+#slide-2 { left: 0; width: 100%; }
+#slide-2 .slide-era { margin-left: calc(25vw + 40px); }
+#slide-2 .slide-title { margin-left: calc(25vw + 40px); }
+#slide-2 .slide-desc, #slide-2 .slide-tags {
+    margin-left: calc(50vw + 20px);
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+
+#slide-3 {
+    left: calc(50vw + 20px);
+    width: calc(25vw - 60px);
+    max-width: calc(25vw - 60px);
+}
+#slide-3 .slide-title { white-space: nowrap; }
+
+#slide-4 { left: calc(25% + 40px); max-width: 600px; }
+
+#slide-5 { left: 60px; max-width: 620px; }
+
+/* ---------------- monitor (panel de inversión publicitaria) ---------------- */
+.monitor {
+    position: fixed;
+    top: 92px;
+    left: 60px;
+    width: calc(25vw - 60px);
+    min-width: 230px;
+    max-width: 360px;
+    z-index: 6;
+    pointer-events: none;
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    transition: clip-path 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
+}
+.monitor.active { clip-path: inset(0 0 0 0); opacity: 1; }
+.monitor-frame {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(4, 4, 6, 0.55);
+}
+.monitor-frame canvas {
+    width: 100%; height: 100%; display: block;
+    transform: scale(1.12);
+    transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.monitor.active .monitor-frame canvas { transform: scale(1); }
+.monitor-scan {
+    position: absolute; inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);
+    pointer-events: none;
+}
+.monitor-cap {
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+    line-height: 1.6;
+}
+
+/* ---------------- HUD año / era / dispositivo ---------------- */
+.year-ticker {
+    position: fixed;
+    top: 96px; right: 60px;
+    text-align: right;
+    z-index: 12;
+    pointer-events: none;
+}
+.yt-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.32);
+    margin-bottom: 6px;
+}
+.yt-year {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 300;
+    font-size: 76px;
+    line-height: 0.9;
+    letter-spacing: -1px;
+    color: rgba(255, 255, 255, 0.92);
+}
+.yt-era {
+    margin-top: 12px;
+    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+.yt-device {
+    margin-top: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.35);
+}
+
+/* ---------------- línea de tiempo inferior ---------------- */
+.timeline {
+    position: fixed;
+    left: 60px; right: 60px; bottom: 30px;
+    z-index: 12;
+    pointer-events: none;
+}
+.timeline-track {
+    position: relative;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.16);
+    margin-bottom: 12px;
+}
+.timeline-fill {
+    position: absolute; left: 0; top: 0; height: 1px;
+    width: 0%;
+    background: rgba(255, 255, 255, 0.75);
+}
+.timeline-marker {
+    position: absolute; top: 50%; left: 0;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #ffffff;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+}
+.timeline-labels {
+    display: flex; justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 2px;
+    color: rgba(255, 255, 255, 0.3);
+}
+.timeline-labels span.on { color: rgba(255, 255, 255, 0.85); }
+
+/* ---------------- hint ---------------- */
+.hint {
+    position: fixed;
+    left: 50%; bottom: 62px;
+    transform: translateX(-50%);
+    z-index: 12; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    transition: opacity 0.6s ease;
+}
+.hint.hidden { opacity: 0; }
+.hint-line { width: 1px; height: 26px; background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0)); animation: hintPulse 2.2s ease-in-out infinite; }
+@keyframes hintPulse { 0%,100% { transform: scaleY(0.4); opacity: 0.3; } 50% { transform: scaleY(1); opacity: 1; } }
+
+/* ---------------- rejilla ---------------- */
+.story-dashes {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex; flex-direction: column; gap: 12px;
+}
+.story-dash { width: 2px; height: 34px; background: rgba(255, 255, 255, 0.15); border-radius: 2px; }
+.story-dash-fill { width: 100%; height: 0%; background: #ffffff; border-radius: 2px; }
+
+.grid-horizontal-line {
+    position: fixed; top: 70px; left: 0; right: 0;
+    width: 100%; height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+    z-index: 5; pointer-events: none;
+}
+.grid-lines {
+    position: fixed; top: 0; left: 40px; right: 40px;
+    width: calc(100% - 80px); height: 100vh;
+    display: flex; justify-content: space-between;
+    z-index: 5; pointer-events: none;
+}
+.grid-line {
+    position: relative; width: 1px; height: 100%;
+    background: rgba(255, 255, 255, 0.12);
+}
+.grid-line:nth-child(3) { margin-top: 70px; height: calc(100vh - 70px); }
+.grid-dot {
+    position: absolute; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    box-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+}
+
+/* ---------------- responsive ---------------- */
+@media (max-width: 1180px) {
+    .slide-title { font-size: 76px; }
+    .yt-year { font-size: 56px; }
+    .monitor { max-width: 260px; }
+}
+@media (max-width: 900px) {
+    .cinematic-container { padding: 0 24px 30px 24px; }
+    .header-nav { display: none; }
+    .monitor { display: none; }
+    .grid-lines { display: none; }
+    .slide { bottom: 16%; left: 0 !important; width: 100% !important; max-width: 100% !important; padding: 0 24px; }
+    #slide-1 .slide-era, #slide-1 .slide-title, #slide-1 .col-1,
+    #slide-2 .slide-era, #slide-2 .slide-title, #slide-2 .slide-desc, #slide-2 .slide-tags { margin-left: 0; }
+    #slide-1 .desc-row { display: block; }
+    #slide-1 .col-1, #slide-1 .col-2, #slide-2 .slide-desc, #slide-2 .slide-tags,
+    #slide-3, #slide-4, #slide-5 { position: static; width: 100%; max-width: 100%; }
+    #slide-1 .col-2 { display: none; }
+    #slide-3 .slide-title { white-space: normal; }
+    .slide-title { font-size: 54px; }
+    .slide-desc { font-size: 14px; }
+    .year-ticker { top: 84px; right: 24px; }
+    .yt-year { font-size: 40px; }
+    .yt-device { display: none; }
+    .timeline { left: 24px; right: 24px; }
+}
+@media (hover: none) {
+    .cursor-inner, .cursor-outer { display: none; }
+    body, * { cursor: auto !important; }
+    .hint { display: none; }
+}
+</style>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+
+<div class="cursor-inner"></div>
+<div class="cursor-outer"></div>
+
+<div class="cinematic-container">
+
+    <div class="main-header">
+        <div class="brand-block">
+            <div class="brand">Atención</div>
+            <div class="brand-sub">2000 — 2026</div>
+        </div>
+        <nav class="header-nav">
+            <a href="#slide-1" class="nav-link">Señal</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-2" class="nav-link">Banda</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-3" class="nav-link">Pantalla</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-4" class="nav-link">Algoritmo</a>
+            <span class="nav-dot"></span>
+            <a href="#slide-5" class="nav-link">Modelo</a>
+        </nav>
+        <div class="header-actions">
+            <a href="#" class="contact-btn" id="restart-btn">Reiniciar <span class="btn-circle"></span></a>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-1">
+        <div class="slide-era">2000 — 2005 · La era del rating</div>
+        <h2 class="slide-title">Señal <br>Abierta</h2>
+        <div class="desc-row">
+            <div class="col-1">
+                <p class="slide-desc">El entretenimiento todavía se medía en horarios. Un país entero frente al mismo canal, a la misma hora: el prime time era el único algoritmo y el rating, la única moneda. El disco, el DVD y la taquilla sostenían la industria.</p>
+            </div>
+            <div class="col-2">
+                <p class="slide-desc">La publicidad compraba interrupciones. Spots de treinta segundos, cortes fijos, puntos de rating y GRP; emplazamiento de producto dentro de la ficción y páginas completas en prensa. Alcance masivo, medición gruesa y ninguna conversación de vuelta.</p>
+                <div class="slide-tags">
+                    <span class="tag">Spot 30"</span>
+                    <span class="tag">GRP / Rating</span>
+                    <span class="tag">Product placement</span>
+                    <span class="tag">Prensa y exterior</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-2">
+        <div class="slide-era">2006 — 2011 · La era del clic</div>
+        <h2 class="slide-title">Banda <br>Ancha</h2>
+        <p class="slide-desc">El catálogo se desprende del horario: descarga, reproductores portátiles, el primer video subido por cualquiera y las primeras suscripciones. La audiencia se fragmenta y el clic se convierte en la prueba de que alguien estuvo ahí. La publicidad se vuelve inventario medible: banners vendidos por mil impresiones, anuncios antes del video, buscadores que cobran por intención y patrocinios de canal.</p>
+        <div class="slide-tags">
+            <span class="tag">CPM / Banner</span>
+            <span class="tag">Pre-roll</span>
+            <span class="tag">Buscador</span>
+            <span class="tag">Patrocinio</span>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-3">
+        <div class="slide-era">2012 — 2017 · La era del perfil</div>
+        <h2 class="slide-title">Pantalla <br>Íntima</h2>
+        <p class="slide-desc">El entretenimiento cabe en un bolsillo y se consume a solas. Streaming, maratones y música ilimitada; el estreno deja de ser un evento colectivo y pasa a ser una notificación. La marca deja de interrumpir y empieza a parecerse al contenido: formatos nativos, creadores como medio, segmentación por comportamiento y pago por clic o por acción.</p>
+        <div class="slide-tags">
+            <span class="tag">Native ads</span>
+            <span class="tag">Creadores</span>
+            <span class="tag">CPC / CPA</span>
+            <span class="tag">Segmentación</span>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-4">
+        <div class="slide-era">2018 — 2022 · La era de la subasta</div>
+        <h2 class="slide-title">Algoritmo <br>Infinito</h2>
+        <p class="slide-desc">El feed vertical no tiene parrilla ni final: recomienda. Video corto, directos y consolas conectadas compiten por el mismo minuto de atención. La compra de medios se automatiza en subastas de tiempo real, la televisión conectada hereda el presupuesto del prime time y aparece el plan con anuncios junto al plan sin ellos.</p>
+        <div class="slide-tags">
+            <span class="tag">Programática / RTB</span>
+            <span class="tag">CTV</span>
+            <span class="tag">AVOD</span>
+            <span class="tag">Video corto</span>
+        </div>
+    </div>
+
+    <div class="slide" id="slide-5">
+        <div class="slide-era">2023 — 2026 · La era del modelo</div>
+        <h2 class="slide-title">Atención <br>Sintética</h2>
+        <p class="slide-desc">La producción y la publicidad comparten herramienta: modelos generativos que escriben, doblan y personalizan el mismo mensaje mil veces. Sin cookies de terceros, mandan el dato propio y el comercio: la tienda se vuelve medio. El creador ya no es un canal más, es el canal; y la atención, el inventario más escaso del catálogo.</p>
+        <div class="slide-tags">
+            <span class="tag">IA generativa</span>
+            <span class="tag">Retail media</span>
+            <span class="tag">Dato propio</span>
+            <span class="tag">Economía creadora</span>
+        </div>
+    </div>
+
+</div>
+
+<div class="monitor" id="monitor">
+    <div class="monitor-frame">
+        <canvas id="monitor-canvas" width="620" height="620"></canvas>
+        <div class="monitor-scan"></div>
+    </div>
+    <div class="monitor-cap">Reparto de la inversión publicitaria<br>Estimación ilustrativa</div>
+</div>
+
+<div class="year-ticker">
+    <div class="yt-label">Año</div>
+    <div class="yt-year" id="yt-year">2000</div>
+    <div class="yt-era" id="yt-era">La era del rating</div>
+    <div class="yt-device" id="yt-device">Televisor de tubo</div>
+</div>
+
+<div class="timeline">
+    <div class="timeline-track">
+        <div class="timeline-fill" id="timeline-fill"></div>
+        <div class="timeline-marker" id="timeline-marker"></div>
+    </div>
+    <div class="timeline-labels" id="timeline-labels">
+        <span>2000</span><span>2006</span><span>2012</span><span>2018</span><span>2023</span><span>2026</span>
+    </div>
+</div>
+
+<div class="hint" id="hint">
+    <span>Desplaza</span>
+    <div class="hint-line"></div>
+</div>
+
+<div class="grid-horizontal-line"></div>
+<div class="grid-lines">
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
+    <div class="grid-line story-progress-container">
+        <div class="grid-dot top"></div>
+        <div class="grid-dot bottom"></div>
+        <div class="story-dashes">
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-1"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-2"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-3"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-4"></div></div>
+            <div class="story-dash"><div class="story-dash-fill" id="dash-fill-5"></div></div>
+        </div>
+    </div>
+</div>
+
+<canvas id="webgl"></canvas>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* =========================================================
+   DATOS DE LAS CINCO ÉPOCAS
+   ========================================================= */
+const ERAS = [
+    {
+        years: '2000 — 2005',
+        era: 'La era del rating',
+        device: 'Televisor de tubo',
+        build: 'crt',
+        shell: '#cdbfa4', trim: '#242021', glow: '#ffb14a', accent: '#ff9a2e',
+        rim: '#ffd7a3',
+        sparkA: '#ff9d2e', sparkB: '#7fe0a8',
+        spend: [42, 34, 18, 5, 0, 1]
+    },
+    {
+        years: '2006 — 2011',
+        era: 'La era del clic',
+        device: 'Reproductor MP3',
+        build: 'mp3',
+        shell: '#e9e9ea', trim: '#9aa0a6', glow: '#9fd8ff', accent: '#6cc4ff',
+        rim: '#dce9ff',
+        sparkA: '#ffd98a', sparkB: '#8fd0ff',
+        spend: [40, 24, 15, 17, 3, 1]
+    },
+    {
+        years: '2012 — 2017',
+        era: 'La era del perfil',
+        device: 'Teléfono inteligente',
+        build: 'phone',
+        shell: '#3a3d42', trim: '#c8ccd2', glow: '#65f0d4', accent: '#3fe0c0',
+        rim: '#c9fff2',
+        sparkA: '#ff6bb5', sparkB: '#67f0d8',
+        spend: [35, 15, 11, 22, 12, 5]
+    },
+    {
+        years: '2018 — 2022',
+        era: 'La era de la subasta',
+        device: 'Pantalla conectada',
+        build: 'tv',
+        shell: '#1d1e22', trim: '#6e7278', glow: '#ff4fa3', accent: '#ff4fa3',
+        rim: '#ffc6e6',
+        sparkA: '#ff4fa3', sparkB: '#8f7bff',
+        spend: [24, 8, 8, 27, 21, 12]
+    },
+    {
+        years: '2023 — 2026',
+        era: 'La era del modelo',
+        device: 'Visor de realidad mixta',
+        build: 'visor',
+        shell: '#24243a', trim: '#8d8ec4', glow: '#a06bff', accent: '#8f6bff',
+        rim: '#cdd6ff',
+        sparkA: '#a06bff', sparkB: '#5fd8ff',
+        spend: [15, 5, 6, 28, 25, 21]
+    }
+];
+const ERA_COUNT = ERAS.length;
+
+const CATS = [
+    { name: 'TV lineal',           color: '#ffb547' },
+    { name: 'Impresos',            color: '#cfc6b8' },
+    { name: 'Radio y exterior',    color: '#8fb0c9' },
+    { name: 'Buscador y display',  color: '#5fe3c0' },
+    { name: 'Social',              color: '#ff6bb5' },
+    { name: 'Video, CTV y retail', color: '#9b7bff' }
+];
+
+/* =========================================================
+   ESTADO GLOBAL
+   ========================================================= */
+const canvas = document.querySelector('#webgl');
+let scene, camera, renderer;
+let modelPivot;
+const devices = [];
+const clock = new THREE.Clock();
+let currentScroll = 0;
+
+let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
+
+let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
+let outerCursorX = window.innerWidth / 2, outerCursorY = window.innerHeight / 2;
+
+let bgMaterial;
+const shaderUniforms = {
+    uTime: { value: 0 },
+    uResolution: { value: new THREE.Vector2(window.innerWidth, window.innerHeight) },
+    uMouse: { value: new THREE.Vector2(0, 0) },
+    uScroll: { value: 0 }
+};
+
+let sparkParticles;
+const sparkCount = 450;
+const sparkData = [];
+
+let rimLight, accentLight;
+const colA = new THREE.Color();
+const colB = new THREE.Color();
+
+const sizes = { width: window.innerWidth, height: window.innerHeight };
+
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+
+function eraColor(prop, f, out) {
+    const i0 = Math.floor(clamp(f, 0, ERA_COUNT - 1));
+    const i1 = Math.min(ERA_COUNT - 1, i0 + 1);
+    const t = clamp(f, 0, ERA_COUNT - 1) - i0;
+    out.set(ERAS[i0][prop]);
+    colB.set(ERAS[i1][prop]);
+    return out.lerp(colB, t);
+}
+
+/* =========================================================
+   GEOMETRÍA: AYUDANTES
+   ========================================================= */
+function roundedShape(w, h, r) {
+    const s = new THREE.Shape();
+    const x = -w / 2, y = -h / 2;
+    r = Math.min(r, w / 2 - 0.001, h / 2 - 0.001);
+    s.moveTo(x + r, y);
+    s.lineTo(x + w - r, y);
+    s.quadraticCurveTo(x + w, y, x + w, y + r);
+    s.lineTo(x + w, y + h - r);
+    s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    s.lineTo(x + r, y + h);
+    s.quadraticCurveTo(x, y + h, x, y + h - r);
+    s.lineTo(x, y + r);
+    s.quadraticCurveTo(x, y, x + r, y);
+    return s;
+}
+
+function slab(w, h, d, r, mat) {
+    const bev = Math.min(r * 0.3, 0.035);
+    const geo = new THREE.ExtrudeGeometry(roundedShape(w, h, r), {
+        depth: Math.max(0.001, d - bev * 2),
+        bevelEnabled: true,
+        bevelSize: bev,
+        bevelThickness: bev,
+        bevelSegments: 3,
+        curveSegments: 14
+    });
+    geo.center();
+    const m = new THREE.Mesh(geo, mat);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    return m;
+}
+
+function box(w, h, d, mat) {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+}
+
+function cyl(rt, rb, h, seg, mat) {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg), mat);
+    m.castShadow = true; m.receiveShadow = true;
+    return m;
+}
+
+function matShell(c) {
+    return new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: 0.55, metalness: 0.35, transparent: true, opacity: 1 });
+}
+function matTrim(c) {
+    return new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: 0.32, metalness: 0.88, transparent: true, opacity: 1 });
+}
+function matGlass(glow, intensity) {
+    return new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#05070a'),
+        roughness: 0.12, metalness: 0.2,
+        emissive: new THREE.Color(glow),
+        emissiveIntensity: intensity || 1.1,
+        transparent: true, opacity: 1
+    });
+}
+
+/* =========================================================
+   LOS CINCO APARATOS
+   ========================================================= */
+function buildCRT(e) {
+    const g = new THREE.Group();
+    const shell = matShell(e.shell);
+    const trim = matTrim(e.trim);
+    const glass = matGlass(e.glow, 1.05);
+
+    const body = slab(2.6, 2.1, 1.5, 0.18, shell);
+    g.add(body);
+
+    // joroba trasera del tubo
+    const hump = cyl(1.05, 0.55, 1.0, 4, shell);
+    hump.rotation.x = Math.PI / 2;
+    hump.rotation.y = Math.PI / 4;
+    hump.position.z = -1.15;
+    g.add(hump);
+
+    // marco y pantalla
+    const bezel = slab(1.98, 1.62, 0.12, 0.22, trim);
+    bezel.position.z = 0.76;
+    g.add(bezel);
+    const screen = slab(1.78, 1.42, 0.1, 0.2, glass);
+    screen.position.set(-0.02, 0.02, 0.82);
+    g.add(screen);
+
+    // panel de control lateral
+    const knobA = cyl(0.14, 0.14, 0.1, 20, trim);
+    knobA.rotation.x = Math.PI / 2;
+    knobA.position.set(1.02, 0.42, 0.76);
+    g.add(knobA);
+    const knobB = cyl(0.1, 0.1, 0.1, 20, trim);
+    knobB.rotation.x = Math.PI / 2;
+    knobB.position.set(1.02, 0.02, 0.76);
+    g.add(knobB);
+    for (let i = 0; i < 5; i++) {
+        const bar = box(0.28, 0.03, 0.03, trim);
+        bar.position.set(1.02, -0.34 - i * 0.08, 0.76);
+        g.add(bar);
+    }
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), matGlass(e.accent, 2.6));
+    led.position.set(1.02, 0.72, 0.78);
+    g.add(led);
+
+    // antena de conejo
+    const base = cyl(0.12, 0.16, 0.1, 16, trim);
+    base.position.set(0, 1.08, -0.5);
+    g.add(base);
+    for (let s = -1; s <= 1; s += 2) {
+        const rod = cyl(0.018, 0.03, 1.35, 10, trim);
+        rod.position.set(s * 0.4, 1.7, -0.62);
+        rod.rotation.z = -s * 0.5;
+        g.add(rod);
+        const tip = new THREE.Mesh(new THREE.SphereGeometry(0.045, 10, 10), trim);
+        tip.position.set(s * 0.72, 2.28, -0.62);
+        g.add(tip);
+    }
+
+    // patas
+    for (let s = -1; s <= 1; s += 2) {
+        const foot = box(0.4, 0.14, 0.4, trim);
+        foot.position.set(s * 0.85, -1.1, 0.2);
+        g.add(foot);
+    }
+    return g;
+}
+
+function buildMP3(e) {
+    const g = new THREE.Group();
+    const shell = matShell(e.shell);
+    const trim = matTrim(e.trim);
+    const glass = matGlass(e.glow, 1.3);
+
+    const body = slab(1.35, 2.25, 0.24, 0.16, shell);
+    g.add(body);
+
+    const bezel = slab(1.12, 0.86, 0.06, 0.05, trim);
+    bezel.position.set(0, 0.52, 0.12);
+    g.add(bezel);
+    const screen = slab(1.02, 0.76, 0.05, 0.04, glass);
+    screen.position.set(0, 0.52, 0.15);
+    g.add(screen);
+
+    // rueda de control
+    const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.12, 18, 56), trim);
+    wheel.position.set(0, -0.52, 0.1);
+    wheel.castShadow = true;
+    g.add(wheel);
+    const center = cyl(0.17, 0.17, 0.07, 28, matGlass(e.accent, 1.6));
+    center.rotation.x = Math.PI / 2;
+    center.position.set(0, -0.52, 0.13);
+    g.add(center);
+
+    // jack y ranura
+    const jack = cyl(0.07, 0.07, 0.12, 16, trim);
+    jack.position.set(-0.4, 1.14, 0);
+    g.add(jack);
+    const hold = box(0.26, 0.06, 0.06, trim);
+    hold.position.set(0.42, 1.14, 0);
+    g.add(hold);
+
+    // trasera metálica
+    const backPlate = slab(1.24, 2.14, 0.05, 0.14, trim);
+    backPlate.position.z = -0.13;
+    g.add(backPlate);
+    return g;
+}
+
+function buildPhone(e) {
+    const g = new THREE.Group();
+    const shell = matShell(e.shell);
+    const trim = matTrim(e.trim);
+    const glass = matGlass(e.glow, 1.25);
+
+    const body = slab(1.32, 2.62, 0.18, 0.22, shell);
+    g.add(body);
+
+    const screen = slab(1.18, 2.34, 0.04, 0.18, glass);
+    screen.position.z = 0.1;
+    g.add(screen);
+
+    // marco metálico
+    const frame = slab(1.36, 2.66, 0.1, 0.23, trim);
+    frame.position.z = -0.02;
+    g.add(frame);
+
+    // muesca superior y altavoz
+    const speaker = box(0.34, 0.05, 0.04, trim);
+    speaker.position.set(0, 1.14, 0.13);
+    g.add(speaker);
+
+    // botones laterales
+    for (let i = 0; i < 2; i++) {
+        const btn = box(0.06, 0.3, 0.1, trim);
+        btn.position.set(-0.7, 0.78 - i * 0.42, 0);
+        g.add(btn);
+    }
+    const power = box(0.06, 0.36, 0.1, trim);
+    power.position.set(0.7, 0.66, 0);
+    g.add(power);
+
+    // cámaras traseras
+    for (let i = 0; i < 2; i++) {
+        const cam = cyl(0.12, 0.12, 0.06, 20, trim);
+        cam.rotation.x = Math.PI / 2;
+        cam.position.set(-0.42, 0.98 - i * 0.3, -0.12);
+        g.add(cam);
+        const lens = cyl(0.06, 0.06, 0.04, 16, matGlass(e.accent, 1.8));
+        lens.rotation.x = Math.PI / 2;
+        lens.position.set(-0.42, 0.98 - i * 0.3, -0.15);
+        g.add(lens);
+    }
+    return g;
+}
+
+function buildTV(e) {
+    const g = new THREE.Group();
+    const shell = matShell(e.shell);
+    const trim = matTrim(e.trim);
+    const glass = matGlass(e.glow, 1.15);
+
+    const panel = slab(3.7, 2.16, 0.14, 0.06, shell);
+    g.add(panel);
+
+    const screen = slab(3.56, 2.02, 0.04, 0.04, glass);
+    screen.position.z = 0.1;
+    g.add(screen);
+
+    // franja inferior y logotipo
+    const chin = box(3.6, 0.05, 0.05, trim);
+    chin.position.set(0, -1.02, 0.1);
+    g.add(chin);
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), matGlass(e.accent, 3.0));
+    led.position.set(0, -1.08, 0.12);
+    g.add(led);
+
+    // soporte
+    const neck = box(0.34, 0.62, 0.22, trim);
+    neck.position.set(0, -1.4, -0.05);
+    g.add(neck);
+    const base = slab(1.7, 0.75, 0.09, 0.2, trim);
+    base.rotation.x = -Math.PI / 2;
+    base.position.set(0, -1.72, -0.05);
+    g.add(base);
+
+    // barra de sonido
+    const bar = slab(2.4, 0.26, 0.24, 0.1, shell);
+    bar.position.set(0, -1.62, 0.55);
+    g.add(bar);
+    return g;
+}
+
+function buildVisor(e) {
+    const g = new THREE.Group();
+    const shell = matShell(e.shell);
+    const trim = matTrim(e.trim);
+    const glass = matGlass(e.glow, 1.35);
+
+    const bodyMesh = slab(2.5, 1.28, 0.86, 0.34, shell);
+    g.add(bodyMesh);
+
+    const visorGlass = slab(2.3, 1.06, 0.1, 0.3, glass);
+    visorGlass.position.z = 0.46;
+    g.add(visorGlass);
+
+    // sensores frontales
+    for (let s = -1; s <= 1; s += 2) {
+        const sensor = cyl(0.08, 0.08, 0.05, 18, matGlass(e.accent, 2.2));
+        sensor.rotation.x = Math.PI / 2;
+        sensor.position.set(s * 0.78, 0.18, 0.53);
+        g.add(sensor);
+    }
+
+    // banda de sujeción
+    const strap = new THREE.Mesh(new THREE.TorusGeometry(1.05, 0.085, 14, 60, Math.PI * 1.1), trim);
+    strap.rotation.x = Math.PI / 2;
+    strap.rotation.z = Math.PI * 0.95;
+    strap.position.set(0, 0.1, -0.55);
+    strap.castShadow = true;
+    g.add(strap);
+
+    // brazos laterales
+    for (let s = -1; s <= 1; s += 2) {
+        const arm = box(0.16, 0.34, 0.7, trim);
+        arm.position.set(s * 1.16, 0.1, -0.2);
+        g.add(arm);
+    }
+
+    // almohadilla facial
+    const pad = slab(2.1, 0.95, 0.3, 0.3, trim);
+    pad.position.z = -0.5;
+    g.add(pad);
+    return g;
+}
+
+const BUILDERS = { crt: buildCRT, mp3: buildMP3, phone: buildPhone, tv: buildTV, visor: buildVisor };
+
+function buildDevices() {
+    modelPivot = new THREE.Group();
+    modelPivot.position.y = -0.4;
+    scene.add(modelPivot);
+
+    ERAS.forEach((e, i) => {
+        const inner = BUILDERS[e.build](e);
+
+        const box0 = new THREE.Box3().setFromObject(inner);
+        const size0 = box0.getSize(new THREE.Vector3());
+        const maxDim = Math.max(size0.x, size0.y, size0.z);
+        inner.scale.setScalar(3.2 / (maxDim > 0.0001 ? maxDim : 1));
+        inner.updateMatrixWorld(true);
+
+        const box1 = new THREE.Box3().setFromObject(inner);
+        const c = box1.getCenter(new THREE.Vector3());
+        inner.position.sub(c);
+
+        const outer = new THREE.Group();
+        outer.add(inner);
+        outer.visible = (i === 0);
+        modelPivot.add(outer);
+
+        const mats = [];
+        inner.traverse((o) => {
+            if (o.isMesh && o.material && mats.indexOf(o.material) === -1) mats.push(o.material);
+        });
+        devices.push({ group: outer, inner: inner, mats: mats, vis: (i === 0 ? 1 : 0) });
+    });
+}
+
+/* =========================================================
+   PARTÍCULAS
+   ========================================================= */
+function createSparkTexture() {
+    const c = document.createElement('canvas');
+    c.width = 16; c.height = 16;
+    const ctx = c.getContext('2d');
+    const gradient = ctx.createRadialGradient(8, 8, 0, 8, 8, 8);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
+    gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.85)');
+    gradient.addColorStop(0.6, 'rgba(255, 255, 255, 0.3)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 16, 16);
+    return new THREE.CanvasTexture(c);
+}
+
+function createSparks() {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(sparkCount * 3);
+    const colors = new Float32Array(sparkCount * 3);
+
+    for (let i = 0; i < sparkCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 6.5;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 5.0 - 0.5;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 6.5;
+
+        colors[i * 3] = 1.0; colors[i * 3 + 1] = 0.5; colors[i * 3 + 2] = 0.2;
+
+        sparkData.push({
+            speedX: (Math.random() - 0.5) * 0.4,
+            speedY: 0.15 + Math.random() * 0.3,
+            speedZ: (Math.random() - 0.5) * 0.4,
+            swaySpeed: 0.5 + Math.random() * 1.5,
+            swayRadius: 0.05 + Math.random() * 0.15,
+            phase: Math.random() * Math.PI * 2,
+            warm: Math.random() < 0.6,
+            jitter: 0.85 + Math.random() * 0.3
+        });
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+    const material = new THREE.PointsMaterial({
+        size: 0.025,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+        map: createSparkTexture()
+    });
+
+    sparkParticles = new THREE.Points(geometry, material);
+    scene.add(sparkParticles);
+}
+
+/* =========================================================
+   FONDO: ONDA DE SEÑAL
+   ========================================================= */
+function createBackgroundShader() {
+    const vertexShader = `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    `;
+
+    const fragmentShader = `
+        varying vec2 vUv;
+        uniform float uTime;
+        uniform vec2 uResolution;
+        uniform vec2 uMouse;
+        uniform float uScroll;
+
+        float hash(float n) { return fract(sin(n) * 43758.5453123); }
+        float noise(in vec3 x) {
+            vec3 p = floor(x);
+            vec3 f = fract(x);
+            f = f*f*(3.0-2.0*f);
+            float n = p.x + p.y*57.0 + 113.0*p.z;
+            return mix(mix(mix(hash(n+  0.0), hash(n+  1.0), f.x),
+                           mix(hash(n+ 57.0), hash(n+ 58.0), f.x), f.y),
+                       mix(mix(hash(n+113.0), hash(n+114.0), f.x),
+                           mix(hash(n+170.0), hash(n+171.0), f.x), f.y), f.z);
+        }
+
+        vec3 pal3(vec3 a, vec3 b, vec3 c, float t) {
+            float t1 = smoothstep(0.0, 1.0, clamp(t * 2.0, 0.0, 1.0));
+            float t2 = smoothstep(0.0, 1.0, clamp((t - 0.5) * 2.0, 0.0, 1.0));
+            return mix(mix(a, b, t1), c, t2);
+        }
+
+        void main() {
+            vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution.xy) / uResolution.y;
+            float aspect = uResolution.x / uResolution.y;
+
+            float time = uTime * 0.08;
+            float scroll = uScroll;
+
+            float angle1 = 0.6;
+            float angle2 = -0.7;
+            float angle3 = 1.2;
+
+            float freq1 = 2.4;
+            float freq2 = 3.2;
+            float freq3 = 4.0;
+
+            vec2 warpedUv = uv;
+            float scrollDeform = scroll * 5.0;
+
+            warpedUv.x += sin(uv.y * 2.5 + time * 0.2 + scrollDeform) * 0.35;
+            warpedUv.y += cos(uv.x * 2.5 - time * 0.15 - scrollDeform * 0.8) * 0.35;
+            warpedUv.x += sin(uv.y * 1.2 - time * 0.1 - scrollDeform * 1.5) * 0.25;
+            warpedUv.y += cos(uv.x * 1.2 + time * 0.18 + scrollDeform * 1.2) * 0.25;
+
+            vec2 scrollDrift = vec2(scroll * 0.04, -scroll * 0.02);
+            vec2 mouseShift = vec2(uMouse.x * aspect * 0.05, uMouse.y * 0.05);
+            warpedUv += scrollDrift + mouseShift;
+
+            vec2 dir1 = vec2(cos(angle1), sin(angle1));
+            vec2 dir2 = vec2(cos(angle2), sin(angle2));
+            vec2 dir3 = vec2(cos(angle3), sin(angle3));
+
+            float w1 = sin(dot(warpedUv, dir1) * freq1 + time * 1.0);
+            float w2 = cos(dot(warpedUv, dir2) * freq2 - time * 1.4 + w1 * 0.4);
+            float w3 = sin(dot(warpedUv, dir3) * freq3 + time * 1.8 + w2 * 0.5);
+
+            float waveField = w1 * 0.50 + w2 * 0.35 + w3 * 0.15;
+
+            float wideSheen = pow(max(0.0, 1.0 - abs(waveField - 0.1)), 2.5);
+            float crispSpecular = pow(max(0.0, 1.0 - abs(waveField - 0.15)), 8.0);
+            float crest = wideSheen * 0.5 + crispSpecular * 0.9;
+
+            // Paletas: fósforo ámbar (2000) -> neón social (2013) -> índigo sintético (2026)
+            vec3 colShadow = pal3(vec3(0.0012, 0.0007, 0.0003),
+                                  vec3(0.0009, 0.0003, 0.0012),
+                                  vec3(0.0004, 0.0008, 0.0016), scroll);
+            vec3 colWave1  = pal3(vec3(0.090, 0.048, 0.012),
+                                  vec3(0.062, 0.012, 0.058),
+                                  vec3(0.012, 0.032, 0.075), scroll);
+            vec3 colWave2  = pal3(vec3(0.052, 0.026, 0.006),
+                                  vec3(0.032, 0.006, 0.034),
+                                  vec3(0.007, 0.018, 0.048), scroll);
+            vec3 colCrest  = pal3(vec3(0.52, 0.34, 0.12),
+                                  vec3(0.48, 0.16, 0.52),
+                                  vec3(0.16, 0.42, 0.72), scroll);
+
+            vec3 color = colShadow;
+            color = mix(color, colWave2, smoothstep(-0.6, 0.2, waveField));
+            color = mix(color, colWave1, smoothstep(0.0, 0.8, waveField));
+            color += colCrest * crest * 1.4;
+
+            // Rastro analógico: líneas de barrido y ruido de señal que se apagan con los años
+            float analog = 1.0 - smoothstep(0.0, 0.45, scroll);
+            float scan = 0.5 + 0.5 * sin(gl_FragCoord.y * 2.2 - uTime * 6.0);
+            color *= 1.0 - analog * 0.10 * scan;
+            float grain = noise(vec3(gl_FragCoord.xy * 0.35, uTime * 3.0));
+            color += (grain - 0.5) * 0.022 * analog;
+
+            // Trama digital que aparece en los años recientes
+            float digital = smoothstep(0.55, 1.0, scroll);
+            vec2 cell = fract(gl_FragCoord.xy / 14.0);
+            float grid = smoothstep(0.02, 0.07, min(cell.x, cell.y));
+            color *= mix(1.0, 0.93 + 0.07 * grid, digital * 0.7);
+
+            float vignette = 1.0 - dot(uv, uv) * 0.12;
+            color *= vignette;
+
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+
+    bgMaterial = new THREE.ShaderMaterial({
+        vertexShader: vertexShader,
+        fragmentShader: fragmentShader,
+        uniforms: shaderUniforms,
+        depthWrite: false,
+        depthTest: false
+    });
+
+    const bgGeometry = new THREE.PlaneGeometry(30, 30);
+    const bgMesh = new THREE.Mesh(bgGeometry, bgMaterial);
+    bgMesh.position.set(0.0, 0.0, -8.0);
+    bgMesh.renderOrder = -10;
+    camera.add(bgMesh);
+}
+
+/* =========================================================
+   ESCENA
+   ========================================================= */
+function initScene() {
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color('#000000');
+    scene.fog = new THREE.FogExp2('#000000', 0.01);
+
+    camera = new THREE.PerspectiveCamera(50, sizes.width / sizes.height, 0.1, 100);
+    camera.position.set(0, 0.2, 3.0);
+    scene.add(camera);
+
+    createBackgroundShader();
+
+    renderer = new THREE.WebGLRenderer({
+        canvas: canvas,
+        antialias: true,
+        alpha: false,
+        powerPreference: "high-performance"
+    });
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 2.2;
+
+    const ambientLight = new THREE.AmbientLight('#ffffff', 0.12);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.SpotLight('#ffffff', 18.0);
+    keyLight.position.set(4, 6, 3);
+    keyLight.angle = Math.PI / 4;
+    keyLight.penumbra = 0.9;
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.width = 2048;
+    keyLight.shadow.mapSize.height = 2048;
+    keyLight.shadow.camera.near = 1.0;
+    keyLight.shadow.camera.far = 15;
+    keyLight.shadow.bias = -0.001;
+    scene.add(keyLight);
+
+    rimLight = new THREE.DirectionalLight('#ffd7a3', 9.0);
+    rimLight.position.set(-5, 3, -4);
+    scene.add(rimLight);
+
+    const fillLight = new THREE.DirectionalLight('#fff3e6', 0.8);
+    fillLight.position.set(-2, -4, 2);
+    scene.add(fillLight);
+
+    accentLight = new THREE.PointLight('#ffb14a', 7.0, 9.0);
+    accentLight.position.set(0, 0.5, 1.8);
+    scene.add(accentLight);
+
+    buildDevices();
+    createSparks();
+}
+
+function onWindowResize() {
+    sizes.width = window.innerWidth;
+    sizes.height = window.innerHeight;
+    camera.aspect = sizes.width / sizes.height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(sizes.width, sizes.height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    if (shaderUniforms) shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
+}
+
+/* =========================================================
+   TEXTO: LETRA A LETRA
+   ========================================================= */
+function splitTitlesIntoChars() {
+    const titles = document.querySelectorAll('.slide-title');
+    titles.forEach(title => {
+        const text = title.innerHTML;
+        let newHTML = '';
+        let delayCounter = 0;
+        const parts = text.split(/(<br\s*\/?>)/i);
+        parts.forEach(part => {
+            if (part.toLowerCase().startsWith('<br')) {
+                newHTML += part;
+            } else {
+                for (let i = 0; i < part.length; i++) {
+                    if (part[i] === ' ') {
+                        newHTML += ' ';
+                    } else {
+                        newHTML += `<span class="char" style="transition-delay: ${delayCounter * 0.035}s">${part[i]}</span>`;
+                        delayCounter++;
+                    }
+                }
+            }
+        });
+        title.innerHTML = newHTML;
+    });
+}
+
+/* =========================================================
+   PANEL DE INVERSIÓN PUBLICITARIA
+   ========================================================= */
+const monitorCanvas = document.getElementById('monitor-canvas');
+const monitorCtx = monitorCanvas.getContext('2d');
+let monitorFrame = 0;
+
+function drawMonitor(f) {
+    const W = monitorCanvas.width, H = monitorCanvas.height;
+    const ctx = monitorCtx;
+    const ff = clamp(f, 0, ERA_COUNT - 1);
+    const i0 = Math.floor(ff), i1 = Math.min(ERA_COUNT - 1, i0 + 1), t = ff - i0;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = 'rgba(5, 5, 8, 0.72)';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = '500 22px Outfit, sans-serif';
+    ctx.fillText('Inversión publicitaria', 34, 56);
+
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = '400 16px "IBM Plex Mono", monospace';
+    ctx.fillText(ERAS[t > 0.5 ? i1 : i0].years, 34, 84);
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.14)';
+    ctx.beginPath(); ctx.moveTo(34, 100); ctx.lineTo(W - 34, 100); ctx.stroke();
+
+    const padL = 34, padR = 34;
+    const barMax = W - padL - padR;
+    const top = 148, rowH = 74;
+
+    CATS.forEach((cat, k) => {
+        const v = lerp(ERAS[i0].spend[k], ERAS[i1].spend[k], t);
+        const y = top + k * rowH;
+
+        ctx.textAlign = 'left';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.font = '400 17px Outfit, sans-serif';
+        ctx.fillText(cat.name, padL, y);
+
+        ctx.textAlign = 'right';
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.font = '400 17px "IBM Plex Mono", monospace';
+        ctx.fillText(v.toFixed(0) + '%', W - padR, y);
+
+        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        ctx.fillRect(padL, y + 14, barMax, 9);
+
+        ctx.save();
+        ctx.shadowColor = cat.color;
+        ctx.shadowBlur = 16;
+        ctx.fillStyle = cat.color;
+        ctx.fillRect(padL, y + 14, Math.max(1, barMax * (v / 45)), 9);
+        ctx.restore();
+    });
+
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(255,255,255,0.28)';
+    ctx.font = '400 13px "IBM Plex Mono", monospace';
+    ctx.fillText('% del gasto global · estimación', padL, H - 30);
+}
+
+/* =========================================================
+   INTERFAZ SOBRE LIENZO
+   ========================================================= */
+const elYear = document.getElementById('yt-year');
+const elEra = document.getElementById('yt-era');
+const elDevice = document.getElementById('yt-device');
+const elFill = document.getElementById('timeline-fill');
+const elMarker = document.getElementById('timeline-marker');
+const elHint = document.getElementById('hint');
+const elMonitor = document.getElementById('monitor');
+const labelSpans = document.querySelectorAll('#timeline-labels span');
+const navLinks = document.querySelectorAll('.nav-link');
+const SLIDE_RANGES = [
+    [-0.10, 0.10],
+    [0.19, 0.31],
+    [0.44, 0.56],
+    [0.69, 0.81],
+    [0.92, 1.05]
+];
+
+let lastYear = -1, lastEra = -1;
+
+function updateHUD(scroll) {
+    const s = clamp(scroll, 0, 1);
+    const year = Math.round(2000 + s * 26);
+    if (year !== lastYear) { elYear.textContent = year; lastYear = year; }
+
+    const idx = Math.round(clamp(s * (ERA_COUNT - 1), 0, ERA_COUNT - 1));
+    if (idx !== lastEra) {
+        elEra.textContent = ERAS[idx].era;
+        elDevice.textContent = ERAS[idx].device;
+        labelSpans.forEach((sp, i) => sp.classList.toggle('on', i === idx));
+        navLinks.forEach((l, i) => l.classList.toggle('current', i === idx));
+        lastEra = idx;
+    }
+
+    elFill.style.width = `${s * 100}%`;
+    elMarker.style.left = `${s * 100}%`;
+    elHint.classList.toggle('hidden', s > 0.012);
+}
+
+function updateSlides(scroll) {
+    for (let i = 1; i <= ERA_COUNT; i++) {
+        const fill = document.getElementById(`dash-fill-${i}`);
+        if (fill) {
+            const start = (i - 1) / ERA_COUNT;
+            const end = i / ERA_COUNT;
+            let progress = (scroll - start) / (end - start);
+            progress = Math.max(0, Math.min(1, progress));
+            fill.style.height = `${progress * 100}%`;
+        }
+    }
+
+    let anyActive = false;
+    for (let i = 1; i <= ERA_COUNT; i++) {
+        const el = document.getElementById(`slide-${i}`);
+        if (!el) continue;
+        const r = SLIDE_RANGES[i - 1];
+        const active = scroll >= r[0] && scroll <= r[1];
+        if (active) anyActive = true;
+        el.classList.toggle('active', active);
+    }
+    elMonitor.classList.toggle('active', anyActive);
+}
+
+function updateGridDots(scroll) {
+    const dots = document.querySelectorAll('.grid-dot');
+    dots.forEach((dot, i) => {
+        const startY = (i * 17) % 80 + 10;
+        let speed = 90 + (i * 55) % 180;
+        if (i % 2 === 0) speed = -speed;
+        let y = startY + scroll * speed;
+        y = ((y % 100) + 100) % 100;
+        dot.style.top = `${y}%`;
+    });
+}
+
+/* =========================================================
+   BUCLE
+   ========================================================= */
+function animate() {
+    requestAnimationFrame(animate);
+    const deltaTime = clock.getDelta();
+    const time = clock.getElapsedTime();
+
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const scrollTop = window.scrollY !== undefined ? window.scrollY
+        : (window.pageYOffset !== undefined ? window.pageYOffset : document.documentElement.scrollTop);
+    const targetScroll = maxScroll > 0 ? scrollTop / maxScroll : 0;
+
+    currentScroll += (targetScroll - currentScroll) * 0.025;
+
+    mouseX += (targetMouseX - mouseX) * 0.05;
+    mouseY += (targetMouseY - mouseY) * 0.05;
+
+    outerCursorX += (cursorX - outerCursorX) * 0.2;
+    outerCursorY += (cursorY - outerCursorY) * 0.2;
+    const cursorOuter = document.querySelector('.cursor-outer');
+    if (cursorOuter) { cursorOuter.style.left = `${outerCursorX}px`; cursorOuter.style.top = `${outerCursorY}px`; }
+
+    if (modelPivot) {
+        modelPivot.rotation.y = mouseX * 0.25;
+        modelPivot.rotation.x = mouseY * 0.15;
+        modelPivot.position.y = -0.4 + Math.sin(time * 0.35) * 0.045;
+    }
+
+    // --- relevo de aparatos: un electrónico por época ---
+    const eraF = clamp(currentScroll, 0, 1) * (ERA_COUNT - 1);
+    for (let i = 0; i < devices.length; i++) {
+        const d = devices[i];
+        const target = clamp((1.0 - Math.abs(eraF - i)) * 2.2, 0, 1);
+        d.vis += (target - d.vis) * 0.12;
+        const v = d.vis;
+        d.group.visible = v > 0.01;
+        if (!d.group.visible) continue;
+        d.group.scale.setScalar(0.78 + 0.22 * v);
+        d.group.rotation.y = (1 - v) * 0.7;
+        d.group.rotation.z = (1 - v) * 0.12;
+        for (let m = 0; m < d.mats.length; m++) d.mats[m].opacity = v;
+    }
+
+    // --- luz de época ---
+    if (rimLight) rimLight.color.copy(eraColor('rim', eraF, colA));
+    if (accentLight) {
+        accentLight.color.copy(eraColor('glow', eraF, colA));
+        accentLight.intensity = 6.0 + Math.sin(time * 1.4) * 0.6;
+    }
+
+    // --- partículas ---
+    if (sparkParticles) {
+        const positions = sparkParticles.geometry.attributes.position.array;
+        const colors = sparkParticles.geometry.attributes.color.array;
+        const scrollVelocity = Math.abs(targetScroll - currentScroll);
+        const speedMultiplier = 1.0 + scrollVelocity * 9.0;
+        const turbulence = scrollVelocity * 0.8;
+
+        const warmC = eraColor('sparkA', eraF, colA).clone();
+        const coolC = eraColor('sparkB', eraF, colA).clone();
+
+        for (let i = 0; i < sparkCount; i++) {
+            const idx = i * 3;
+            const data = sparkData[i];
+            positions[idx] += data.speedX * deltaTime * speedMultiplier;
+            positions[idx + 1] += data.speedY * deltaTime * speedMultiplier;
+            positions[idx + 2] += data.speedZ * deltaTime * speedMultiplier;
+
+            const currentSway = data.swayRadius * (1.0 + turbulence * 4.0);
+            positions[idx] += Math.sin(time * data.swaySpeed + data.phase) * currentSway * deltaTime;
+            positions[idx + 2] += Math.cos(time * data.swaySpeed + data.phase) * currentSway * deltaTime;
+
+            if (positions[idx + 1] > 3.0 || Math.abs(positions[idx]) > 3.5 || Math.abs(positions[idx + 2]) > 3.5) {
+                positions[idx + 1] = -2.5;
+                positions[idx] = (Math.random() - 0.5) * 3.0;
+                positions[idx + 2] = (Math.random() - 0.5) * 3.0;
+            }
+
+            const c = data.warm ? warmC : coolC;
+            colors[idx] = c.r * data.jitter;
+            colors[idx + 1] = c.g * data.jitter;
+            colors[idx + 2] = c.b * data.jitter;
+        }
+        sparkParticles.geometry.attributes.position.needsUpdate = true;
+        sparkParticles.geometry.attributes.color.needsUpdate = true;
+    }
+
+    // --- órbita de cámara ---
+    const phi = currentScroll * Math.PI * 2.0;
+    const y = 0.35 + Math.sin(currentScroll * Math.PI) * 0.8;
+    const radius = 4.4 - Math.sin(currentScroll * Math.PI) * 0.6;
+    const x = radius * Math.sin(phi);
+    const z = radius * Math.cos(phi);
+
+    const transitionProgress = Math.min(1.0, currentScroll / 0.22);
+    const easeFactor = (Math.cos(transitionProgress * Math.PI) + 1.0) * 0.5;
+    const lookAtXOffset = -0.9 * easeFactor;
+    const targetLookAt = new THREE.Vector3(lookAtXOffset, -0.15, 0);
+    const targetPos = new THREE.Vector3(x, y, z);
+    camera.position.lerp(targetPos, 0.025);
+    camera.lookAt(targetLookAt);
+
+    if (shaderUniforms) {
+        shaderUniforms.uTime.value = time;
+        shaderUniforms.uMouse.value.set(mouseX, -mouseY);
+        shaderUniforms.uScroll.value = currentScroll;
+    }
+
+    updateSlides(currentScroll);
+    updateGridDots(currentScroll);
+    updateHUD(currentScroll);
+
+    if ((monitorFrame++ % 3) === 0) drawMonitor(eraF);
+
+    renderer.render(scene, camera);
+}
+
+/* =========================================================
+   NAVEGACIÓN Y PUNTERO
+   ========================================================= */
+function setupNavigation() {
+    const targetScrolls = [0.0, 0.25, 0.5, 0.75, 1.0];
+    navLinks.forEach((link, index) => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+            window.scrollTo({ top: maxScroll * targetScrolls[index], behavior: 'smooth' });
+        });
+    });
+    const restart = document.getElementById('restart-btn');
+    if (restart) restart.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+}
+
+window.addEventListener('mousemove', (event) => {
+    cursorX = event.clientX;
+    cursorY = event.clientY;
+    const cursorInner = document.querySelector('.cursor-inner');
+    if (cursorInner) { cursorInner.style.left = `${cursorX}px`; cursorInner.style.top = `${cursorY}px`; }
+    targetMouseX = (event.clientX / window.innerWidth) * 2 - 1;
+    targetMouseY = (event.clientY / window.innerHeight) * 2 - 1;
+});
+window.addEventListener('resize', onWindowResize);
+
+/* =========================================================
+   ARRANQUE
+   ========================================================= */
+splitTitlesIntoChars();
+initScene();
+onWindowResize();
+drawMonitor(0);
+animate();
+setupNavigation();
+</script>
+</body>
+</html>
