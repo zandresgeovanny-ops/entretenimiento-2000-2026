@@ -67,9 +67,13 @@ body {
 /* El hero es ahora una sección con principio y final: su altura define
    el rango de scroll de la escena 3D. Lo que venga después (grid) empieza
    donde esta sección termina, sin tocar la lógica de la escena. */
+/* 27 años × ~100vh de recorrido cada uno. Con los 900vh originales cada
+   aparato recibía 33vh y el relevo se sentía atropellado; a 2700vh hay una
+   pantalla completa de scroll por año. Es la palanca para acelerar o frenar
+   el conjunto: subirla ralentiza todo proporcionalmente. */
 .hero {
     position: relative;
-    height: 900vh;
+    height: 2700vh;
 }
 
 /* Envuelve todo lo que vive en pantalla durante el hero para poder
@@ -313,7 +317,83 @@ a:focus-visible, button:focus-visible {
 .hero-cover.ready .cover-cta:hover .cta-arrow,
 .hero-cover.ready .cover-cta:focus-visible .cta-arrow { transform: translateY(4px); }
 
-/* ---------------- slides ---------------- */
+/* ---------------- panel de año (caja única) ---------------- */
+.year-panel {
+    position: absolute;
+    left: 0; bottom: 11%;
+    /* Ancho acotado a la mitad del ancho útil: el aparato 3D respira a la
+       derecha y el texto nunca lo cruza. */
+    width: min(46vw, 560px);
+    pointer-events: none;
+}
+.yp-count {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.42);
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 14px;
+}
+.yp-year {
+    font-family: 'Italiana', serif;
+    font-size: var(--fs-title);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: 3px;
+    color: #fff6ed;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.8);
+    margin-bottom: clamp(6px, 1.2vh, 14px);
+}
+.yp-device {
+    font-size: clamp(15px, min(1.6vw, 3.2vh), 26px);
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    color: #e7ebf0;
+    text-wrap: balance;
+    text-shadow: 0 1px 14px rgba(0, 0, 0, 0.9);
+    margin-bottom: clamp(12px, 2.2vh, 26px);
+}
+.yp-rows { display: flex; flex-direction: column; gap: clamp(6px, 1.1vh, 11px); }
+.yp-row {
+    display: flex; align-items: baseline; gap: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.13);
+    padding-top: clamp(5px, 0.9vh, 9px);
+}
+.yp-row dt {
+    flex: 0 0 auto;
+    width: 148px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+.yp-row dd {
+    /* min-width:0 permite que el texto largo se recorte en vez de empujar
+       la fila y desbordar el panel. */
+    min-width: 0; flex: 1 1 auto;
+    font-size: var(--fs-body);
+    font-weight: 300;
+    color: #d5dae1;
+    overflow-wrap: break-word;
+    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
+}
+
+/* El contenido del panel se releva: sale, cambia, entra. Nunca se solapan
+   dos años porque es el mismo nodo el que se reescribe. */
+.year-panel .yp-year,
+.year-panel .yp-device,
+.year-panel .yp-rows,
+.year-panel .yp-count {
+    transition: opacity 260ms var(--ease-micro), transform 260ms var(--ease-micro);
+}
+.year-panel.swapping .yp-year,
+.year-panel.swapping .yp-device,
+.year-panel.swapping .yp-rows,
+.year-panel.swapping .yp-count {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+/* ---------------- slides (portada) ---------------- */
 .slide { position: absolute; bottom: 12%; pointer-events: none; }
 
 .slide-era {
@@ -689,71 +769,18 @@ a:focus-visible, button:focus-visible {
         </div>
     </div>
 
-    <div class="slide" id="slide-1">
-        <div class="slide-era">2000 — 2005 · La era del rating</div>
-        <h2 class="slide-title">Señal <br>Abierta</h2>
-        <div class="desc-row">
-            <div class="col-1">
-                <p class="slide-desc">El entretenimiento todavía se medía en horarios. Un país entero frente al mismo canal, a la misma hora: el prime time era el único algoritmo y el rating, la única moneda. El disco, el DVD y la taquilla sostenían la industria.</p>
-            </div>
-            <div class="col-2">
-                <p class="slide-desc">La publicidad compraba interrupciones. Spots de treinta segundos, cortes fijos, puntos de rating y GRP; emplazamiento de producto dentro de la ficción y páginas completas en prensa. Alcance masivo, medición gruesa y ninguna conversación de vuelta.</p>
-                <div class="slide-tags">
-                    <span class="tag">Spot 30"</span>
-                    <span class="tag">GRP / Rating</span>
-                    <span class="tag">Product placement</span>
-                    <span class="tag">Prensa y exterior</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="slide" id="slide-2">
-        <div class="slide-era">2006 — 2011 · La era del clic</div>
-        <h2 class="slide-title">Banda <br>Ancha</h2>
-        <p class="slide-desc">El catálogo se desprende del horario: descarga, reproductores portátiles, el primer video subido por cualquiera y las primeras suscripciones. La audiencia se fragmenta y el clic se convierte en la prueba de que alguien estuvo ahí. La publicidad se vuelve inventario medible: banners vendidos por mil impresiones, anuncios antes del video, buscadores que cobran por intención y patrocinios de canal.</p>
-        <div class="slide-tags">
-            <span class="tag">CPM / Banner</span>
-            <span class="tag">Pre-roll</span>
-            <span class="tag">Buscador</span>
-            <span class="tag">Patrocinio</span>
-        </div>
-    </div>
-
-    <div class="slide" id="slide-3">
-        <div class="slide-era">2012 — 2017 · La era del perfil</div>
-        <h2 class="slide-title">Pantalla <br>Íntima</h2>
-        <p class="slide-desc">El entretenimiento cabe en un bolsillo y se consume a solas. Streaming, maratones y música ilimitada; el estreno deja de ser un evento colectivo y pasa a ser una notificación. La marca deja de interrumpir y empieza a parecerse al contenido: formatos nativos, creadores como medio, segmentación por comportamiento y pago por clic o por acción.</p>
-        <div class="slide-tags">
-            <span class="tag">Native ads</span>
-            <span class="tag">Creadores</span>
-            <span class="tag">CPC / CPA</span>
-            <span class="tag">Segmentación</span>
-        </div>
-    </div>
-
-    <div class="slide" id="slide-4">
-        <div class="slide-era">2018 — 2022 · La era de la subasta</div>
-        <h2 class="slide-title">Algoritmo <br>Infinito</h2>
-        <p class="slide-desc">El feed vertical no tiene parrilla ni final: recomienda. Video corto, directos y consolas conectadas compiten por el mismo minuto de atención. La compra de medios se automatiza en subastas de tiempo real, la televisión conectada hereda el presupuesto del prime time y aparece el plan con anuncios junto al plan sin ellos.</p>
-        <div class="slide-tags">
-            <span class="tag">Programática / RTB</span>
-            <span class="tag">CTV</span>
-            <span class="tag">AVOD</span>
-            <span class="tag">Video corto</span>
-        </div>
-    </div>
-
-    <div class="slide" id="slide-5">
-        <div class="slide-era">2023 — 2026 · La era del modelo</div>
-        <h2 class="slide-title">Atención <br>Sintética</h2>
-        <p class="slide-desc">La producción y la publicidad comparten herramienta: modelos generativos que escriben, doblan y personalizan el mismo mensaje mil veces. Sin cookies de terceros, mandan el dato propio y el comercio: la tienda se vuelve medio. El creador ya no es un canal más, es el canal; y la atención, el inventario más escaso del catálogo.</p>
-        <div class="slide-tags">
-            <span class="tag">IA generativa</span>
-            <span class="tag">Retail media</span>
-            <span class="tag">Dato propio</span>
-            <span class="tag">Economía creadora</span>
-        </div>
+    <!-- Un único panel para los 27 años. Con una sola caja de texto en
+         pantalla la superposición es imposible por construcción, no por
+         ajuste de márgenes: no hay una segunda caja con la que chocar. -->
+    <div class="year-panel" id="year-panel">
+        <div class="yp-count"><span id="yp-num">01</span> / 27</div>
+        <h2 class="yp-year" id="yp-year">2000</h2>
+        <div class="yp-device" id="yp-device">Televisor de tubo</div>
+        <dl class="yp-rows">
+            <div class="yp-row"><dt>Sector</dt><dd id="yp-sec">Televisión abierta</dd></div>
+            <div class="yp-row"><dt>Modelo publicitario</dt><dd id="yp-ad">Spot de 30 segundos</dd></div>
+            <div class="yp-row"><dt>Era</dt><dd id="yp-eraname">La era del rating</dd></div>
+        </dl>
     </div>
 
 </div>
@@ -816,64 +843,67 @@ import * as THREE from 'three';
 /* =========================================================
    DATOS DE LAS CINCO ÉPOCAS
    ========================================================= */
+/* Las cinco eras siguen gobernando color, luz y panel de datos. */
 const ERAS = [
-    {
-        years: '2000 — 2005',
-        era: 'La era del rating',
-        device: 'Televisor de tubo',
-        build: 'crt',
-        shell: '#cdbfa4', trim: '#242021', glow: '#ffb14a', accent: '#ff9a2e',
-        rim: '#ffd7a3',
-        sparkA: '#ff9d2e', sparkB: '#7fe0a8',
-        // TV 37% y periódicos 29.8% del gasto mundial en 2005 (ZenithOptimedia);
-        // internet 3.8%. Revistas incluidas en impresos.
-        spend: [37, 43, 16, 4, 0, 0], sourced: true
-    },
-    {
-        years: '2006 — 2011',
-        era: 'La era del clic',
-        device: 'Reproductor MP3',
-        build: 'mp3',
-        shell: '#e9e9ea', trim: '#9aa0a6', glow: '#9fd8ff', accent: '#6cc4ff',
-        rim: '#dce9ff',
-        sparkA: '#ffd98a', sparkB: '#8fd0ff',
-        spend: [38, 33, 15, 13, 1, 0], sourced: false
-    },
-    {
-        years: '2012 — 2017',
-        era: 'La era del perfil',
-        device: 'Teléfono inteligente',
-        build: 'phone',
-        shell: '#3a3d42', trim: '#c8ccd2', glow: '#65f0d4', accent: '#3fe0c0',
-        rim: '#c9fff2',
-        sparkA: '#ff6bb5', sparkB: '#67f0d8',
-        spend: [36, 17, 13, 25, 7, 2], sourced: false
-    },
-    {
-        years: '2018 — 2022',
-        era: 'La era de la subasta',
-        device: 'Pantalla conectada',
-        build: 'tv',
-        shell: '#1d1e22', trim: '#6e7278', glow: '#ff4fa3', accent: '#ff4fa3',
-        rim: '#ffc6e6',
-        sparkA: '#ff4fa3', sparkB: '#8f7bff',
-        spend: [22, 8, 10, 34, 18, 8], sourced: false
-    },
-    {
-        years: '2023 — 2026',
-        era: 'La era del modelo',
-        device: 'Visor de realidad mixta',
-        build: 'visor',
-        shell: '#24243a', trim: '#8d8ec4', glow: '#a06bff', accent: '#8f6bff',
-        rim: '#cdd6ff',
-        sparkA: '#a06bff', sparkB: '#5fd8ff',
-        // 2026: digital = 73% del gasto mundial ($740 mM de $1,06 B). Dentro del
-        // digital, buscador 40% y display 18% → 41% del total; social 32% → 23%;
-        // video/CTV 10% más retail media ($62 mM) → 13%. TV lineal ~11%.
-        spend: [11, 4, 8, 41, 23, 13], sourced: true
-    }
+    { years: '2000 — 2005', era: 'La era del rating',   rim: '#ffd7a3', glow: '#ffb14a',
+      sparkA: '#ff9d2e', sparkB: '#7fe0a8',
+      // TV 37% y periódicos 29,8% del gasto mundial en 2005 (ZenithOptimedia);
+      // internet 3,8%. Revistas incluidas en impresos.
+      spend: [37, 43, 16, 4, 0, 0], sourced: true },
+    { years: '2006 — 2011', era: 'La era del clic',     rim: '#dce9ff', glow: '#9fd8ff',
+      sparkA: '#ffd98a', sparkB: '#8fd0ff',
+      spend: [38, 33, 15, 13, 1, 0], sourced: false },
+    { years: '2012 — 2017', era: 'La era del perfil',   rim: '#c9fff2', glow: '#65f0d4',
+      sparkA: '#ff6bb5', sparkB: '#67f0d8',
+      spend: [36, 17, 13, 25, 7, 2], sourced: false },
+    { years: '2018 — 2022', era: 'La era de la subasta', rim: '#ffc6e6', glow: '#ff4fa3',
+      sparkA: '#ff4fa3', sparkB: '#8f7bff',
+      spend: [22, 8, 10, 34, 18, 8], sourced: false },
+    { years: '2023 — 2026', era: 'La era del modelo',   rim: '#cdd6ff', glow: '#a06bff',
+      sparkA: '#a06bff', sparkB: '#5fd8ff',
+      // 2026: digital = 73% del gasto mundial (740 mM $ de 1,06 B $). Dentro del
+      // digital, buscador 40% y display 18% → 41% del total; social 32% → 23%;
+      // vídeo/CTV 10% más retail media (62 mM $) → 13%. TV lineal ~11%.
+      spend: [11, 4, 8, 41, 23, 13], sourced: true }
 ];
 const ERA_COUNT = ERAS.length;
+
+/* =========================================================
+   VEINTISIETE AÑOS, VEINTISIETE APARATOS
+   2000–2026 ambos incluidos = 27, no 26.
+   `a` es el arquetipo geométrico y `p` sus parámetros: así el código no
+   crece de forma lineal con el número de años.
+   ========================================================= */
+const YEARS = [
+    { y: 2000, dev: 'Televisor de tubo',        sec: 'Televisión abierta',  ad: 'Spot de 30 segundos',        a: 'crt',    p: { deep: 1.5, ant: true },  sh: '#cdbfa4', tr: '#242021', gl: '#ffb14a' },
+    { y: 2001, dev: 'Reproductor MP3',          sec: 'Música',              ad: 'Patrocinio de catálogo',     a: 'slab',   p: { w: 1.35, h: 2.25, wheel: true }, sh: '#e9e9ea', tr: '#9aa0a6', gl: '#9fd8ff' },
+    { y: 2002, dev: 'Reproductor de DVD',       sec: 'Cine doméstico',      ad: 'Tráiler en disco',           a: 'deck',   p: { w: 3.2, h: 0.55 },       sh: '#2a2b2f', tr: '#b9bcc2', gl: '#63d6ff' },
+    { y: 2003, dev: 'Cámara digital compacta',  sec: 'Contenido amateur',   ad: 'Impreso especializado',      a: 'cam',    p: { w: 1.7, h: 1.1 },        sh: '#8e9298', tr: '#26282c', gl: '#8fe6c0' },
+    { y: 2004, dev: 'Teléfono de concha',       sec: 'Móvil',               ad: 'SMS promocional',            a: 'flip',   p: {},                        sh: '#4a4e57', tr: '#c9ced6', gl: '#7fe0a8' },
+    { y: 2005, dev: 'Consola portátil',         sec: 'Videojuego',          ad: 'Emplazamiento en juego',     a: 'flip',   p: { wide: true },            sh: '#3c3f45', tr: '#d4d8de', gl: '#9fd8ff' },
+    { y: 2006, dev: 'Videoconsola de salón',    sec: 'Videojuego',          ad: 'Publicidad dentro del juego', a: 'deck',  p: { w: 2.6, h: 0.75 },       sh: '#e6e7e9', tr: '#8d9298', gl: '#8fd0ff' },
+    { y: 2007, dev: 'Teléfono táctil',          sec: 'Móvil',               ad: 'Banner en aplicación',       a: 'slab',   p: { w: 1.25, h: 2.35 },      sh: '#31343a', tr: '#c8ccd2', gl: '#8fd0ff' },
+    { y: 2008, dev: 'Ordenador ultraportátil',  sec: 'Vídeo en red',        ad: 'Pre-roll',                   a: 'lap',    p: {},                        sh: '#5a5e66', tr: '#c2c6cc', gl: '#a8dcff' },
+    { y: 2009, dev: 'Descodificador de red',    sec: 'Vídeo bajo demanda',  ad: 'Suscripción sin anuncios',   a: 'deck',   p: { w: 2.0, h: 0.42 },       sh: '#232529', tr: '#7d8288', gl: '#ffd98a' },
+    { y: 2010, dev: 'Tableta',                  sec: 'Prensa digital',      ad: 'Publicidad nativa',          a: 'slab',   p: { w: 2.1, h: 2.8 },        sh: '#3b3e44', tr: '#cdd1d7', gl: '#7fe6d0' },
+    { y: 2011, dev: 'Televisor plano conectado', sec: 'Televisión conectada', ad: 'Anuncio interactivo',      a: 'panel',  p: { w: 3.5, h: 2.05 },       sh: '#1d1e22', tr: '#6e7278', gl: '#63e6c3' },
+    { y: 2012, dev: 'Cámara de acción',         sec: 'Creadores',           ad: 'Reparto de ingresos',        a: 'cam',    p: { w: 1.2, h: 1.2, cube: true }, sh: '#d8dade', tr: '#2b2d31', gl: '#ff9d5c' },
+    { y: 2013, dev: 'Adaptador de streaming',   sec: 'Streaming',           ad: 'Segmentación por perfil',    a: 'stick',  p: {},                        sh: '#26282c', tr: '#9aa0a6', gl: '#65f0d4' },
+    { y: 2014, dev: 'Altavoz inteligente',      sec: 'Audio',               ad: 'Audio programático',         a: 'cylin',  p: { r: 0.75, h: 2.1 },       sh: '#3a3d42', tr: '#8f959c', gl: '#67f0d8' },
+    { y: 2015, dev: 'Reloj inteligente',        sec: 'Cuantificación',      ad: 'Notificación patrocinada',   a: 'slab',   p: { w: 1.5, h: 1.8, strap: true }, sh: '#43464d', tr: '#d0d4da', gl: '#5fe3c0' },
+    { y: 2016, dev: 'Visor de realidad virtual', sec: 'Inmersivo',          ad: 'Experiencia de marca',       a: 'visor',  p: {},                        sh: '#26272e', tr: '#8a8f98', gl: '#8f7bff' },
+    { y: 2017, dev: 'Barra de sonido',          sec: 'Cine doméstico',      ad: 'Marca sonora',               a: 'deck',   p: { w: 3.4, h: 0.5 },        sh: '#232428', tr: '#7a7f86', gl: '#ff6bb5' },
+    { y: 2018, dev: 'Teléfono sin marcos',      sec: 'Vídeo vertical',      ad: 'Historia patrocinada',       a: 'slab',   p: { w: 1.3, h: 2.7 },        sh: '#25272b', tr: '#c0c4ca', gl: '#ff4fa3' },
+    { y: 2019, dev: 'Auriculares inalámbricos', sec: 'Pódcast',             ad: 'Mención del anfitrión',      a: 'buds',   p: {},                        sh: '#eceef0', tr: '#9aa0a6', gl: '#ffc6e6' },
+    { y: 2020, dev: 'Consola de nueva generación', sec: 'Videojuego',       ad: 'Evento en directo',          a: 'panel',  p: { w: 1.5, h: 3.0, thick: 0.7 }, sh: '#f0f1f3', tr: '#2c2e33', gl: '#8f7bff' },
+    { y: 2021, dev: 'Teléfono plegable',        sec: 'Vídeo corto',         ad: 'Subasta programática',       a: 'flip',   p: { tall: true },            sh: '#2e3036', tr: '#c8ccd2', gl: '#ff4fa3' },
+    { y: 2022, dev: 'Cámara de retransmisión',  sec: 'Directo',             ad: 'Comercio en directo',        a: 'cam',    p: { w: 1.4, h: 1.4 },        sh: '#1f2126', tr: '#8a9098', gl: '#a06bff' },
+    { y: 2023, dev: 'Visor de realidad mixta',  sec: 'Espacial',            ad: 'Anuncio volumétrico',        a: 'visor',  p: { pro: true },             sh: '#24243a', tr: '#8d8ec4', gl: '#a06bff' },
+    { y: 2024, dev: 'Gafas con asistente',      sec: 'Asistentes',          ad: 'Recomendación generada',     a: 'glass',  p: {},                        sh: '#2a2a34', tr: '#b9bcc8', gl: '#8f6bff' },
+    { y: 2025, dev: 'Dispositivo de IA sin pantalla', sec: 'Interfaz por voz', ad: 'Medio de comercio',       a: 'cylin',  p: { r: 0.55, h: 1.1, pin: true }, sh: '#33344a', tr: '#a9abc4', gl: '#5fd8ff' },
+    { y: 2026, dev: 'Pantalla ambiental',       sec: 'Ambiente',            ad: 'Creatividad sintética',      a: 'panel',  p: { w: 2.6, h: 2.6, thin: true }, sh: '#1e1f2e', tr: '#9698bd', gl: '#a06bff' }
+];
+const YEAR_COUNT = YEARS.length;   // 27
 
 const CATS = [
     { name: 'TV lineal',           color: '#ffb547' },
@@ -933,13 +963,21 @@ const smoothstep = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
        hueco 1: 0.155 → 0.190   |   hueco 2: 0.310 → 0.440
        hueco 3: 0.560 → 0.690   |   hueco 4: 0.810 → 0.880
    ========================================================= */
-const SWAPS = [
-    { at: 0.1725, span: 0.016 },
-    { at: 0.3750, span: 0.055 },
-    { at: 0.6250, span: 0.055 },
-    { at: 0.8450, span: 0.032 }
-];
+/* 26 relevos para 27 años, repartidos uniformemente.
+   `span` es la mitad de la ventana de cambio, en progreso de hero. Con un
+   tramo de 1/27 (≈0.037) y span 0.0046, el cambio ocupa el 25% del tramo:
+   el aparato pasa tres cuartas partes del año quieto y solo el cuarto
+   central se dedica al relevo. Subir `span` alarga la transición; bajarlo
+   la vuelve más seca. */
+const SWAP_SPAN = 0.0046;
+const SWAPS = [];
+for (let i = 1; i < YEAR_COUNT; i++) SWAPS.push({ at: i / YEAR_COUNT, span: SWAP_SPAN });
 const SWAP_TRAVEL = 1.6;  // unidades que recorre el aparato al entrar o salir
+
+/** Índice de año (0..26) en un punto del recorrido. */
+function yearIndex(s) {
+    return clamp(Math.floor(clamp(s, 0, 0.99999) * YEAR_COUNT), 0, YEAR_COUNT - 1);
+}
 
 /** Visibilidad y dirección de un aparato en un punto del recorrido.
  *  dir: -1 se hunde al salir, +1 desciende al entrar, 0 en reposo. */
@@ -1043,9 +1081,10 @@ function matGlass(glow, intensity) {
    ========================================================= */
 function buildCRT(e) {
     const g = new THREE.Group();
-    const shell = matShell(e.shell);
-    const trim = matTrim(e.trim);
-    const glass = matGlass(e.glow, 1.05);
+    const shell = matShell(e.sh);
+    const trim = matTrim(e.tr);
+    const glass = matGlass(e.gl, 1.05);
+    const accent = e.gl;
 
     const body = slab(2.6, 2.1, 1.5, 0.18, shell);
     g.add(body);
@@ -1079,7 +1118,7 @@ function buildCRT(e) {
         bar.position.set(1.02, -0.34 - i * 0.08, 0.76);
         g.add(bar);
     }
-    const led = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), matGlass(e.accent, 2.6));
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), matGlass(accent, 2.6));
     led.position.set(1.02, 0.72, 0.78);
     g.add(led);
 
@@ -1233,9 +1272,10 @@ function buildTV(e) {
 
 function buildVisor(e) {
     const g = new THREE.Group();
-    const shell = matShell(e.shell);
-    const trim = matTrim(e.trim);
-    const glass = matGlass(e.glow, 1.35);
+    const shell = matShell(e.sh);
+    const trim = matTrim(e.tr);
+    const glass = matGlass(e.gl, 1.35);
+    const accent = e.gl;
 
     const bodyMesh = slab(2.5, 1.28, 0.86, 0.34, shell);
     g.add(bodyMesh);
@@ -1246,7 +1286,7 @@ function buildVisor(e) {
 
     // sensores frontales
     for (let s = -1; s <= 1; s += 2) {
-        const sensor = cyl(0.08, 0.08, 0.05, 18, matGlass(e.accent, 2.2));
+        const sensor = cyl(0.08, 0.08, 0.05, 18, matGlass(accent, 2.2));
         sensor.rotation.x = Math.PI / 2;
         sensor.position.set(s * 0.78, 0.18, 0.53);
         g.add(sensor);
@@ -1274,15 +1314,226 @@ function buildVisor(e) {
     return g;
 }
 
-const BUILDERS = { crt: buildCRT, mp3: buildMP3, phone: buildPhone, tv: buildTV, visor: buildVisor };
+/* --- arquetipos añadidos para cubrir los 27 años --- */
+
+// Bandeja horizontal: DVD, consola de salón, descodificador, barra de sonido.
+function buildDeck(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.6);
+    const w = d.p.w || 3.0, h = d.p.h || 0.55;
+    g.add(slab(w, h, 1.5, 0.06, shell));
+    const face = slab(w * 0.96, h * 0.55, 0.04, 0.03, trim);
+    face.position.z = 0.78; g.add(face);
+    const disp = slab(w * 0.3, h * 0.28, 0.03, 0.02, glass);
+    disp.position.set(-w * 0.24, 0, 0.82); g.add(disp);
+    for (let i = 0; i < 3; i++) {
+        const btn = cyl(0.06, 0.06, 0.04, 16, trim);
+        btn.rotation.x = Math.PI / 2;
+        btn.position.set(w * 0.22 + i * 0.18, -h * 0.12, 0.8); g.add(btn);
+    }
+    for (let s = -1; s <= 1; s += 2) {
+        const foot = box(0.22, 0.1, 0.22, trim);
+        foot.position.set(s * w * 0.4, -h / 2 - 0.05, 0.4); g.add(foot);
+    }
+    return g;
+}
+
+// Cuerpo de cámara con objetivo saliente.
+function buildCam(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.5);
+    const w = d.p.w || 1.6, h = d.p.h || 1.1;
+    g.add(slab(w, h, d.p.cube ? w * 0.8 : 0.65, 0.09, shell));
+    const barrel = cyl(0.34, 0.38, 0.42, 28, trim);
+    barrel.rotation.x = Math.PI / 2;
+    barrel.position.set(-w * 0.12, 0, 0.5); g.add(barrel);
+    const lens = cyl(0.24, 0.24, 0.06, 28, glass);
+    lens.rotation.x = Math.PI / 2;
+    lens.position.set(-w * 0.12, 0, 0.72); g.add(lens);
+    const shutter = cyl(0.07, 0.07, 0.07, 16, trim);
+    shutter.position.set(w * 0.32, h / 2 + 0.02, 0); g.add(shutter);
+    const screen = slab(w * 0.55, h * 0.5, 0.03, 0.03, matGlass(d.gl, 1.1));
+    screen.position.z = -0.36; g.add(screen);
+    return g;
+}
+
+// Dos cuerpos articulados: concha, portátil de juego, plegable.
+function buildFlip(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.3);
+    const w = d.p.wide ? 2.4 : (d.p.tall ? 1.4 : 1.15);
+    const h = d.p.tall ? 1.5 : 1.25;
+    const top = slab(w, h, 0.16, 0.12, shell);
+    top.position.set(0, h * 0.62, -0.18);
+    top.rotation.x = -0.34; g.add(top);
+    const topScreen = slab(w * 0.84, h * 0.72, 0.03, 0.08, glass);
+    topScreen.position.set(0, h * 0.62, -0.09);
+    topScreen.rotation.x = -0.34; g.add(topScreen);
+    const bottom = slab(w, h, 0.18, 0.12, shell);
+    bottom.position.set(0, -h * 0.55, 0.06); g.add(bottom);
+    if (d.p.tall) {
+        const lower = slab(w * 0.84, h * 0.7, 0.03, 0.08, glass);
+        lower.position.set(0, -h * 0.55, 0.16); g.add(lower);
+    } else {
+        for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) {
+            const k = box(w * 0.2, 0.06, 0.05, trim);
+            k.position.set((c - 1) * w * 0.26, -h * 0.55 + (1 - r) * 0.26, 0.16); g.add(k);
+        }
+    }
+    const hinge = cyl(0.07, 0.07, w * 0.9, 16, trim);
+    hinge.rotation.z = Math.PI / 2;
+    hinge.position.set(0, 0, -0.02); g.add(hinge);
+    return g;
+}
+
+// Concha abierta con teclado: ultraportátil.
+function buildLap(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.2);
+    const lid = slab(3.0, 1.95, 0.12, 0.06, shell);
+    lid.position.set(0, 1.0, -0.85); lid.rotation.x = -0.32; g.add(lid);
+    const scr = slab(2.82, 1.78, 0.03, 0.04, glass);
+    scr.position.set(0, 1.0, -0.77); scr.rotation.x = -0.32; g.add(scr);
+    const base = slab(3.0, 2.1, 0.14, 0.06, shell);
+    base.rotation.x = -Math.PI / 2; base.position.set(0, -0.05, 0.2); g.add(base);
+    const keys = slab(2.5, 1.0, 0.03, 0.04, trim);
+    keys.rotation.x = -Math.PI / 2; keys.position.set(0, 0.04, -0.05); g.add(keys);
+    const pad = slab(0.8, 0.55, 0.02, 0.04, trim);
+    pad.rotation.x = -Math.PI / 2; pad.position.set(0, 0.04, 0.75); g.add(pad);
+    return g;
+}
+
+// Losa fina de gran superficie: televisor plano, consola vertical, pantalla ambiental.
+function buildPanel(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.15);
+    const w = d.p.w || 3.5, h = d.p.h || 2.05, t = d.p.thick || (d.p.thin ? 0.07 : 0.13);
+    g.add(slab(w, h, t, d.p.thin ? 0.5 : 0.05, shell));
+    const scr = slab(w * 0.95, h * 0.94, 0.03, d.p.thin ? 0.48 : 0.03, glass);
+    scr.position.z = t / 2 + 0.02; g.add(scr);
+    if (!d.p.thin) {
+        const neck = box(w * 0.1, 0.5, 0.2, trim);
+        neck.position.set(0, -h / 2 - 0.25, -0.04); g.add(neck);
+        const base = slab(w * 0.42, 0.6, 0.08, 0.16, trim);
+        base.rotation.x = -Math.PI / 2;
+        base.position.set(0, -h / 2 - 0.52, -0.04); g.add(base);
+    }
+    return g;
+}
+
+// Barra compacta con conector: adaptador de streaming.
+function buildStick(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 2.0);
+    g.add(slab(2.2, 0.85, 0.3, 0.34, shell));
+    const plug = box(0.7, 0.42, 0.14, trim);
+    plug.position.set(1.4, 0, 0); g.add(plug);
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.07, 14, 14), glass);
+    led.position.set(-0.72, 0, 0.18); g.add(led);
+    return g;
+}
+
+// Cuerpo cilíndrico: altavoz inteligente, dispositivo de IA.
+function buildCylin(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 2.2);
+    const r = d.p.r || 0.75, h = d.p.h || 2.1;
+    const bodyMesh = cyl(r, r * 1.02, h, 40, shell);
+    g.add(bodyMesh);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r * 0.94, 0.05, 12, 44), glass);
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = d.p.pin ? 0 : h / 2 - 0.1; g.add(ring);
+    const cap = cyl(r * 0.9, r * 0.9, 0.08, 40, trim);
+    cap.position.y = h / 2 + 0.02; g.add(cap);
+    if (d.p.pin) {
+        const lens = cyl(0.12, 0.12, 0.05, 20, glass);
+        lens.rotation.x = Math.PI / 2;
+        lens.position.set(0, h * 0.18, r); g.add(lens);
+    }
+    return g;
+}
+
+// Dos cápsulas y estuche: auriculares inalámbricos.
+function buildBuds(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.8);
+    const kase = slab(1.7, 1.25, 0.75, 0.3, shell);
+    kase.position.y = -0.7; g.add(kase);
+    const led = new THREE.Mesh(new THREE.SphereGeometry(0.05, 12, 12), glass);
+    led.position.set(0, -0.7, 0.4); g.add(led);
+    for (let s = -1; s <= 1; s += 2) {
+        const bud = new THREE.Mesh(new THREE.SphereGeometry(0.3, 22, 22), shell);
+        bud.position.set(s * 0.5, 0.62, 0); bud.castShadow = true; g.add(bud);
+        const stem = cyl(0.09, 0.07, 0.8, 18, shell);
+        stem.position.set(s * 0.5, 0.15, 0.02); g.add(stem);
+        const tip = cyl(0.11, 0.11, 0.1, 16, trim);
+        tip.rotation.z = Math.PI / 2;
+        tip.position.set(s * 0.72, 0.68, 0); g.add(tip);
+    }
+    return g;
+}
+
+// Montura con lentes: gafas con asistente.
+function buildGlass(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.4);
+    for (let s = -1; s <= 1; s += 2) {
+        const rim = new THREE.Mesh(new THREE.TorusGeometry(0.62, 0.075, 12, 40), shell);
+        rim.position.set(s * 0.78, 0, 0); rim.castShadow = true; g.add(rim);
+        const lens = slab(1.1, 1.05, 0.04, 0.45, glass);
+        lens.position.set(s * 0.78, 0, 0); g.add(lens);
+        const arm = box(1.9, 0.11, 0.1, shell);
+        arm.position.set(s * 2.2, 0.12, -0.42);
+        arm.rotation.y = s * 0.38; g.add(arm);
+    }
+    const bridge = box(0.5, 0.1, 0.1, shell);
+    g.add(bridge);
+    const cam = cyl(0.09, 0.09, 0.06, 18, trim);
+    cam.rotation.x = Math.PI / 2;
+    cam.position.set(1.42, 0.42, 0.1); g.add(cam);
+    return g;
+}
+
+/* Adaptadores: los tres arquetipos originales aceptan ahora un registro de año. */
+function buildSlabDevice(d) {
+    const g = new THREE.Group();
+    const shell = matShell(d.sh), trim = matTrim(d.tr), glass = matGlass(d.gl, 1.3);
+    const w = d.p.w || 1.3, h = d.p.h || 2.4;
+    g.add(slab(w, h, 0.2, Math.min(0.22, w * 0.16), shell));
+    const scr = slab(w * 0.86, h * (d.p.wheel ? 0.38 : 0.88), 0.03, 0.05, glass);
+    scr.position.set(0, d.p.wheel ? h * 0.24 : 0, 0.12); g.add(scr);
+    if (d.p.wheel) {
+        const wheel = new THREE.Mesh(new THREE.TorusGeometry(w * 0.3, w * 0.09, 16, 44), trim);
+        wheel.position.set(0, -h * 0.23, 0.1); wheel.castShadow = true; g.add(wheel);
+        const c = cyl(w * 0.12, w * 0.12, 0.06, 24, matGlass(d.gl, 1.4));
+        c.rotation.x = Math.PI / 2; c.position.set(0, -h * 0.23, 0.13); g.add(c);
+    }
+    if (d.p.strap) {
+        for (let s = -1; s <= 1; s += 2) {
+            const band = slab(w * 0.62, h * 0.8, 0.1, 0.1, trim);
+            band.position.set(0, s * h * 0.82, -0.02);
+            band.rotation.x = s * 0.18; g.add(band);
+        }
+        const crown = cyl(0.09, 0.09, 0.14, 18, trim);
+        crown.rotation.z = Math.PI / 2;
+        crown.position.set(w * 0.56, h * 0.12, 0); g.add(crown);
+    }
+    return g;
+}
+
+const BUILDERS = {
+    crt: buildCRT, slab: buildSlabDevice, deck: buildDeck, cam: buildCam,
+    flip: buildFlip, lap: buildLap, panel: buildPanel, stick: buildStick,
+    cylin: buildCylin, buds: buildBuds, glass: buildGlass, visor: buildVisor
+};
 
 function buildDevices() {
     modelPivot = new THREE.Group();
     modelPivot.position.y = -0.4;
     scene.add(modelPivot);
 
-    ERAS.forEach((e, i) => {
-        const inner = BUILDERS[e.build](e);
+    YEARS.forEach((e, i) => {
+        const inner = BUILDERS[e.a](e);
 
         const box0 = new THREE.Box3().setFromObject(inner);
         const size0 = box0.getSize(new THREE.Vector3());
@@ -1697,15 +1948,32 @@ const HERO = {
     CTA_TARGET: 0.10          // adonde salta el CTA: primera era ya asentada
 };
 
-/* La primera era arranca después de la portada, no en 0, para que titular
-   y slide-1 no se pisen. El resto de rangos no se toca. */
-const SLIDE_RANGES = [
-    [0.055, 0.155],
-    [0.19, 0.31],
-    [0.44, 0.56],
-    [0.69, 0.81],
-    [0.88, 1.00]
-];
+/* Índice del primer año de cada era, más el cierre. Las cinco eras siguen
+   gobernando color, luz y panel de datos; los 27 años, el aparato y el texto. */
+const ERA_BOUNDS = [0, 6, 12, 18, 23, YEAR_COUNT];
+
+function eraIndexOfYear(i) {
+    for (let e = ERA_COUNT - 1; e >= 0; e--) if (i >= ERA_BOUNDS[e]) return e;
+    return 0;
+}
+
+/** Posición continua en el eje de eras (0..4) para interpolar color y datos. */
+function eraFloat(s) {
+    const t = clamp(s, 0, 1) * YEAR_COUNT;
+    for (let e = 0; e < ERA_COUNT; e++) {
+        const a = ERA_BOUNDS[e], b = ERA_BOUNDS[e + 1];
+        if (t < b) return clamp(e + (t - a) / (b - a), 0, ERA_COUNT - 1);
+    }
+    return ERA_COUNT - 1;
+}
+
+const yearPanel = document.getElementById('year-panel');
+const ypNum = document.getElementById('yp-num');
+const ypYear = document.getElementById('yp-year');
+const ypDevice = document.getElementById('yp-device');
+const ypSec = document.getElementById('yp-sec');
+const ypAd = document.getElementById('yp-ad');
+const ypEraName = document.getElementById('yp-eraname');
 
 /** Progreso 0..1 dentro del hero, medido contra la propia sección.
  *  Independiente de lo que venga debajo (grid, modal), así que añadir
@@ -1748,22 +2016,45 @@ function updateHeroChrome(p) {
     heroStage.style.pointerEvents = exit > 0.6 ? 'none' : '';
 }
 
-let lastYear = -1, lastEra = -1;
+let lastYearIdx = -1, lastEra = -1;
+let swapTimer = null;
+
+/** Releva el contenido del panel: sale, se reescribe, entra. Al ser un único
+ *  nodo el que se reescribe, dos años no pueden coexistir en pantalla. */
+function updateYearPanel(s) {
+    const idx = yearIndex(s);
+    if (idx === lastYearIdx) return;
+    lastYearIdx = idx;
+    const d = YEARS[idx];
+    const e = eraIndexOfYear(idx);
+
+    const write = () => {
+        ypNum.textContent = String(idx + 1).padStart(2, '0');
+        ypYear.textContent = d.y;
+        ypDevice.textContent = d.dev;
+        ypSec.textContent = d.sec;
+        ypAd.textContent = d.ad;
+        ypEraName.textContent = ERAS[e].era;
+        elYear.textContent = d.y;
+        elDevice.textContent = d.dev;
+        yearPanel.classList.remove('swapping');
+    };
+
+    if (REDUCE_MOTION) { write(); return; }
+    yearPanel.classList.add('swapping');
+    clearTimeout(swapTimer);
+    swapTimer = setTimeout(write, 260);   // igual que la transición CSS
+}
 
 function updateHUD(scroll) {
     const s = clamp(scroll, 0, 1);
-    const year = Math.round(2000 + s * 26);
-    if (year !== lastYear) { elYear.textContent = year; lastYear = year; }
-
-    const idx = Math.round(clamp(s * (ERA_COUNT - 1), 0, ERA_COUNT - 1));
-    if (idx !== lastEra) {
-        elEra.textContent = ERAS[idx].era;
-        elDevice.textContent = ERAS[idx].device;
-        labelSpans.forEach((sp, i) => sp.classList.toggle('on', i === idx));
-        navLinks.forEach((l, i) => l.classList.toggle('current', i === idx));
-        lastEra = idx;
+    const e = eraIndexOfYear(yearIndex(s));
+    if (e !== lastEra) {
+        elEra.textContent = ERAS[e].era;
+        labelSpans.forEach((sp, i) => sp.classList.toggle('on', i === e));
+        navLinks.forEach((l, i) => l.classList.toggle('current', i === e));
+        lastEra = e;
     }
-
     elFill.style.width = `${s * 100}%`;
     elMarker.style.left = `${s * 100}%`;
 }
@@ -1772,24 +2063,14 @@ function updateSlides(scroll) {
     for (let i = 1; i <= ERA_COUNT; i++) {
         const fill = document.getElementById(`dash-fill-${i}`);
         if (fill) {
-            const start = (i - 1) / ERA_COUNT;
-            const end = i / ERA_COUNT;
-            let progress = (scroll - start) / (end - start);
-            progress = Math.max(0, Math.min(1, progress));
+            const start = ERA_BOUNDS[i - 1] / YEAR_COUNT;
+            const end = ERA_BOUNDS[i] / YEAR_COUNT;
+            const progress = clamp((scroll - start) / (end - start), 0, 1);
             fill.style.height = `${progress * 100}%`;
         }
     }
-
-    let anyActive = false;
-    for (let i = 1; i <= ERA_COUNT; i++) {
-        const el = document.getElementById(`slide-${i}`);
-        if (!el) continue;
-        const r = SLIDE_RANGES[i - 1];
-        const active = scroll >= r[0] && scroll <= r[1];
-        if (active) anyActive = true;
-        el.classList.toggle('active', active);
-    }
-    elMonitor.classList.toggle('active', anyActive);
+    // El panel de datos acompaña todo el recorrido una vez pasada la portada.
+    elMonitor.classList.toggle('active', scroll > 0.02);
 }
 
 function updateGridDots(scroll) {
@@ -1838,9 +2119,9 @@ function animate() {
     }
 
     // --- relevo de aparatos: nunca dos en pantalla a la vez ---
-    // eraF sigue siendo lineal: gobierna color de luz, partículas y panel de
-    // datos, que sí deben migrar de forma continua a lo largo del recorrido.
-    const eraF = clamp(currentScroll, 0, 1) * (ERA_COUNT - 1);
+    // eraF gobierna color de luz, partículas y panel de datos, que migran de
+    // forma continua; el aparato y el texto van por año, en saltos discretos.
+    const eraF = eraFloat(currentScroll);
     for (let i = 0; i < devices.length; i++) {
         const d = devices[i];
         const st = deviceState(i, currentScroll);
@@ -1929,6 +2210,7 @@ function animate() {
     updateSlides(currentScroll);
     updateGridDots(currentScroll);
     updateHUD(currentScroll);
+    updateYearPanel(currentScroll);
 
     if ((monitorFrame++ % 3) === 0) drawMonitor(eraF);
 
@@ -1946,7 +2228,10 @@ function scrollToHero(t) {
 }
 
 function setupNavigation() {
-    const targetScrolls = [0.10, 0.25, 0.5, 0.75, 1.0];
+    // Cada enlace salta al primer año de su era, más un cuarto de tramo para
+    // caer en la zona estable y no en mitad de un relevo.
+    const targetScrolls = ERA_BOUNDS.slice(0, ERA_COUNT)
+        .map(b => (b + 0.25) / YEAR_COUNT);
     navLinks.forEach((link, index) => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
