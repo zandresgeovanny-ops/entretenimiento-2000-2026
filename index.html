@@ -856,6 +856,49 @@ const sizes = { width: window.innerWidth, height: window.innerHeight };
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
+const smoothstep = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+
+/* =========================================================
+   RELEVO DE APARATOS
+   Regla: nunca hay dos electrónicos en pantalla a la vez. El saliente
+   se retira por completo y solo entonces emerge el siguiente.
+
+   Los puntos de relevo caen en los huecos entre slides, no en sus centros,
+   para que el aparato nunca se desvanezca mientras se lee el texto de su
+   era. Cada `at` es el punto medio del hueco correspondiente y `span` la
+   mitad de la ventana de cambio (medida en progreso de hero).
+       hueco 1: 0.155 → 0.190   |   hueco 2: 0.310 → 0.440
+       hueco 3: 0.560 → 0.690   |   hueco 4: 0.810 → 0.880
+   ========================================================= */
+const SWAPS = [
+    { at: 0.1725, span: 0.016 },
+    { at: 0.3750, span: 0.055 },
+    { at: 0.6250, span: 0.055 },
+    { at: 0.8450, span: 0.032 }
+];
+const SWAP_TRAVEL = 1.6;  // unidades que recorre el aparato al entrar o salir
+
+/** Visibilidad y dirección de un aparato en un punto del recorrido.
+ *  dir: -1 se hunde al salir, +1 desciende al entrar, 0 en reposo. */
+function deviceState(i, s) {
+    for (let k = 0; k < SWAPS.length; k++) {
+        const w = SWAPS[k];
+        if (s > w.at - w.span && s < w.at + w.span) {
+            if (s <= w.at) {
+                // Primera mitad: solo se retira el saliente.
+                if (i === k) return { v: 1 - smoothstep((s - (w.at - w.span)) / w.span), dir: -1 };
+                return { v: 0, dir: i === k + 1 ? 1 : 0 };
+            }
+            // Segunda mitad: el escenario ya está libre, entra el siguiente.
+            if (i === k + 1) return { v: smoothstep((s - w.at) / w.span), dir: 1 };
+            return { v: 0, dir: i === k ? -1 : 0 };
+        }
+    }
+    // Fuera de toda ventana: un único aparato, a plena presencia.
+    let idx = 0;
+    for (let k = 0; k < SWAPS.length; k++) if (s >= SWAPS[k].at) idx = k + 1;
+    return { v: i === idx ? 1 : 0, dir: 0 };
+}
 
 function eraColor(prop, f, out) {
     const i0 = Math.floor(clamp(f, 0, ERA_COUNT - 1));
@@ -1719,18 +1762,27 @@ function animate() {
         modelPivot.position.y = -0.4 + Math.sin(time * 0.35) * 0.045;
     }
 
-    // --- relevo de aparatos: un electrónico por época ---
+    // --- relevo de aparatos: nunca dos en pantalla a la vez ---
+    // eraF sigue siendo lineal: gobierna color de luz, partículas y panel de
+    // datos, que sí deben migrar de forma continua a lo largo del recorrido.
     const eraF = clamp(currentScroll, 0, 1) * (ERA_COUNT - 1);
     for (let i = 0; i < devices.length; i++) {
         const d = devices[i];
-        const target = clamp((1.0 - Math.abs(eraF - i)) * 2.2, 0, 1);
-        d.vis += (target - d.vis) * 0.12;
-        const v = d.vis;
-        d.group.visible = v > 0.01;
-        if (!d.group.visible) continue;
-        d.group.scale.setScalar(0.78 + 0.22 * v);
-        d.group.rotation.y = (1 - v) * 0.7;
-        d.group.rotation.z = (1 - v) * 0.12;
+        const st = deviceState(i, currentScroll);
+        const v = st.v;
+        d.vis = v;
+        d.group.visible = v > 0.004;
+
+        // El saliente se hunde y el entrante desciende: el eje vertical se lee
+        // igual desde cualquier punto de la órbita de cámara, a diferencia de
+        // un desplazamiento lateral, que cambia de sentido según el ángulo.
+        d.group.position.y = st.dir * (1 - v) * SWAP_TRAVEL;
+        d.group.scale.setScalar(0.80 + 0.20 * v);
+        d.group.rotation.y = st.dir * (1 - v) * 0.55;
+        d.group.rotation.z = 0;
+
+        // Se aplica siempre, también con el grupo oculto: así al reaparecer
+        // no arranca con la opacidad del ciclo anterior.
         for (let m = 0; m < d.mats.length; m++) d.mats[m].opacity = v;
     }
 
@@ -1854,9 +1906,13 @@ drawMonitor(0);
 animate();
 setupNavigation();
 
-// La portada arranca su entrada un fotograma después del split, para que las
-// letras partan del estado inicial y no salten ya colocadas.
-requestAnimationFrame(() => heroCover.classList.add('ready'));
+// Se fuerza el cálculo de estilo para que el navegador registre el estado
+// inicial de las letras (opacidad 0, desplazadas) antes de revelarlas; así la
+// transición se dispara en vez de saltar. No se usa requestAnimationFrame:
+// se pausa en pestañas de fondo y la portada se quedaría invisible hasta que
+// la pestaña recibiera el foco.
+void heroCover.offsetWidth;
+heroCover.classList.add('ready');
 </script>
 </body>
 </html>
