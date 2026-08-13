@@ -8,6 +8,27 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@200;300;400;500;600&family=IBM+Plex+Mono:wght@300;400;500&display=swap');
 
+/* =========================================================
+   LENGUAJE TEMPORAL DE LA PIEZA
+   Toda transición de la pieza sale de aquí. El hero fija el
+   vocabulario; grid y modal lo heredan.
+   ========================================================= */
+:root {
+    /* Curvas */
+    --ease-editorial: cubic-bezier(0.25, 1, 0.5, 1);  /* entradas de texto: arranca rápido, frena largo */
+    --ease-reveal:    cubic-bezier(0.16, 1, 0.3, 1);  /* máscaras y wipes de superficie */
+    --ease-micro:     cubic-bezier(0.33, 1, 0.68, 1); /* respuesta a puntero/teclado */
+
+    /* Duraciones */
+    --dur-micro:  240ms;  /* hover/focus: por debajo del umbral de "espera" */
+    --dur-text:   800ms;  /* texto editorial: entra con peso */
+    --dur-reveal: 1600ms; /* superficies grandes: wipe cinematográfico */
+    --stagger-char: 35ms; /* cadencia letra a letra */
+
+    /* Geometría del margen editorial */
+    --gutter: 60px;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
 html, body {
@@ -20,11 +41,26 @@ html, body {
 }
 
 body {
-    min-height: 900vh;
     font-family: 'Outfit', sans-serif;
     color: #ffffff;
     overflow-x: hidden;
     cursor: none;
+}
+
+/* El hero es ahora una sección con principio y final: su altura define
+   el rango de scroll de la escena 3D. Lo que venga después (grid) empieza
+   donde esta sección termina, sin tocar la lógica de la escena. */
+.hero {
+    position: relative;
+    height: 900vh;
+}
+
+/* Envuelve todo lo que vive en pantalla durante el hero para poder
+   cederle el paso al grid con una sola opacidad. Solo `opacity`:
+   `transform` o `filter` aquí romperían el position:fixed de los hijos. */
+.hero-stage {
+    opacity: 1;
+    will-change: opacity;
 }
 
 * { cursor: none !important; }
@@ -89,12 +125,29 @@ body {
 }
 .header-nav { display: flex; align-items: center; gap: 22px; }
 .nav-link {
+    position: relative;
     color: rgba(255, 255, 255, 0.65); text-decoration: none;
     font-size: 10px; text-transform: uppercase; letter-spacing: 2px;
-    font-weight: 500; transition: color 0.3s;
+    font-weight: 500;
+    transition: color var(--dur-micro) var(--ease-micro);
 }
-.nav-link:hover, .nav-link.current { color: #ffffff; }
+/* El subrayado crece desde la izquierda: dirección de lectura = dirección
+   del tiempo en la pieza. La era actual lo mantiene fijo, así que hover y
+   estado activo hablan el mismo idioma visual. */
+.nav-link::after {
+    content: '';
+    position: absolute; left: 0; bottom: -6px;
+    width: 100%; height: 1px;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-micro) var(--ease-micro);
+}
+.nav-link:hover, .nav-link:focus-visible, .nav-link.current { color: #ffffff; }
+.nav-link:hover::after, .nav-link:focus-visible::after, .nav-link.current::after { transform: scaleX(1); }
+
 .nav-dot { width: 3px; height: 3px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; }
+
 .contact-btn {
     display: inline-flex; align-items: center; gap: 8px;
     padding: 10px 24px;
@@ -102,13 +155,125 @@ body {
     text-decoration: none;
     font-size: 10px; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
     border-radius: 20px;
-    transition: transform 0.3s, background 0.3s;
+    transition: transform var(--dur-micro) var(--ease-micro),
+                background var(--dur-micro) var(--ease-micro);
 }
 .btn-circle {
     display: inline-block; width: 6px; height: 6px;
     border: 1px solid #000000; border-radius: 50%; background: transparent;
+    transition: background var(--dur-micro) var(--ease-micro),
+                transform var(--dur-micro) var(--ease-micro);
 }
-.contact-btn:hover { transform: scale(1.05); background: #f0f0f0; }
+.contact-btn:hover, .contact-btn:focus-visible { transform: scale(1.05); background: #f0f0f0; }
+/* El punto se rellena: confirma el objetivo sin mover el texto del botón. */
+.contact-btn:hover .btn-circle,
+.contact-btn:focus-visible .btn-circle { background: #000000; transform: scale(1.25); }
+
+/* Foco por teclado visible sobre fondo negro, en todos los interactivos. */
+a:focus-visible, button:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, 0.85);
+    outline-offset: 6px;
+    border-radius: 2px;
+}
+
+/* ---------------- portada del hero ---------------- */
+/* Vive sobre el escenario 3D: el televisor de tubo ya está encendido
+   detrás del titular antes de que empiece el recorrido. */
+.hero-cover {
+    position: fixed;
+    left: var(--gutter);
+    bottom: 16%;
+    width: min(58vw, 900px);
+    z-index: 30;
+    pointer-events: none;
+}
+.cover-kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 26px;
+    opacity: 0; transform: translateY(14px);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial);
+}
+.cover-title {
+    font-family: 'Italiana', serif;
+    font-size: clamp(46px, 7.6vw, 132px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: 2px;
+    color: #fff6ed;
+    margin-bottom: 30px;
+}
+.cover-standfirst {
+    font-size: 17px; line-height: 1.65; font-weight: 300;
+    color: #d1d5db; letter-spacing: 0.4px;
+    max-width: 46ch;
+    opacity: 0; transform: translateY(24px);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial);
+}
+/* El arranque escalona kicker → título → bajada → rango → CTA.
+   Los retardos salen del propio stagger de letras para que la bajada
+   entre justo cuando el titular termina de asentarse. */
+.hero-cover.ready .cover-kicker    { opacity: 1; transform: translateY(0); transition-delay: 120ms; }
+.hero-cover.ready .cover-standfirst{ opacity: 1; transform: translateY(0); transition-delay: 900ms; }
+.hero-cover.ready .cover-span      { opacity: 1; transform: translateY(0); transition-delay: 1080ms; }
+.hero-cover.ready .cover-cta       { opacity: 1; transform: translateY(0); transition-delay: 1260ms; }
+
+/* Indicador temporal: la regla se dibuja de 2000 hacia 2026. */
+.cover-span {
+    display: flex; align-items: center; gap: 18px;
+    margin-top: 34px;
+    opacity: 0; transform: translateY(18px);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial);
+}
+.cover-year {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.72);
+}
+.cover-rule {
+    flex: 1; max-width: 200px; height: 1px;
+    background: rgba(255, 255, 255, 0.35);
+    transform: scaleX(0); transform-origin: left center;
+    transition: transform var(--dur-reveal) var(--ease-reveal);
+    transition-delay: 1180ms;
+}
+.hero-cover.ready .cover-rule { transform: scaleX(1); }
+
+.cover-cta {
+    display: inline-flex; align-items: center; gap: 10px;
+    margin-top: 40px;
+    padding: 13px 26px 13px 28px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 24px;
+    color: #ffffff;
+    font-family: 'Outfit', sans-serif;
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    pointer-events: auto;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial),
+                border-color var(--dur-micro) var(--ease-micro),
+                background var(--dur-micro) var(--ease-micro);
+}
+.cta-arrow {
+    display: inline-block;
+    transition: transform var(--dur-micro) var(--ease-micro);
+}
+/* Hover: el borde se afirma y la flecha baja, anticipando el gesto de scroll
+   que el botón dispara. Nunca cambia de tamaño: el CTA es un ancla, no un objeto. */
+.hero-cover.ready .cover-cta:hover,
+.hero-cover.ready .cover-cta:focus-visible {
+    border-color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.06);
+}
+.hero-cover.ready .cover-cta:hover .cta-arrow,
+.hero-cover.ready .cover-cta:focus-visible .cta-arrow { transform: translateY(4px); }
 
 /* ---------------- slides ---------------- */
 .slide { position: absolute; bottom: 12%; pointer-events: none; }
@@ -161,16 +326,17 @@ body {
     white-space: nowrap;
 }
 
-.slide-title .char {
+.slide-title .char, .cover-title .char {
     display: inline-block;
     opacity: 0;
     transform: translateY(50px);
     filter: blur(12px);
-    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
-                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1),
-                filter 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial),
+                filter var(--dur-text) var(--ease-editorial);
 }
-.slide.active .slide-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
+.slide.active .slide-title .char,
+.hero-cover.ready .cover-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
 .slide.active { pointer-events: auto; }
 
 #slide-1 { left: 0; width: 100%; }
@@ -257,6 +423,7 @@ body {
     text-align: right;
     z-index: 12;
     pointer-events: none;
+    opacity: 0; /* releva a la portada; el valor lo escribe updateHeroChrome */
 }
 .yt-label {
     font-family: 'IBM Plex Mono', monospace;
@@ -290,6 +457,7 @@ body {
     left: 60px; right: 60px; bottom: 30px;
     z-index: 12;
     pointer-events: none;
+    opacity: 0; /* releva a la portada; el valor lo escribe updateHeroChrome */
 }
 .timeline-track {
     position: relative;
@@ -316,22 +484,6 @@ body {
     color: rgba(255, 255, 255, 0.3);
 }
 .timeline-labels span.on { color: rgba(255, 255, 255, 0.85); }
-
-/* ---------------- hint ---------------- */
-.hint {
-    position: fixed;
-    left: 50%; bottom: 62px;
-    transform: translateX(-50%);
-    z-index: 12; pointer-events: none;
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; letter-spacing: 3px; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.45);
-    transition: opacity 0.6s ease;
-}
-.hint.hidden { opacity: 0; }
-.hint-line { width: 1px; height: 26px; background: linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0)); animation: hintPulse 2.2s ease-in-out infinite; }
-@keyframes hintPulse { 0%,100% { transform: scaleY(0.4); opacity: 0.3; } 50% { transform: scaleY(1); opacity: 1; } }
 
 /* ---------------- rejilla ---------------- */
 .story-dashes {
@@ -392,11 +544,38 @@ body {
     .yt-year { font-size: 40px; }
     .yt-device { display: none; }
     .timeline { left: 24px; right: 24px; }
+    .hero-cover { left: 24px; right: 24px; width: auto; bottom: 20%; }
+    .cover-standfirst { font-size: 15px; }
 }
 @media (hover: none) {
     .cursor-inner, .cursor-outer { display: none; }
     body, * { cursor: auto !important; }
-    .hint { display: none; }
+}
+
+/* =========================================================
+   MOVIMIENTO REDUCIDO
+   Se conserva la jerarquía (el contenido sigue apareciendo en su sitio),
+   se elimina el desplazamiento, el desenfoque y el escalonado.
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0ms !important;
+    }
+    .slide-title .char, .cover-title .char {
+        opacity: 1 !important; transform: none !important; filter: none !important;
+    }
+    .cover-kicker, .cover-standfirst, .cover-span, .cover-cta,
+    .slide-desc, .slide-era, .slide-tags {
+        opacity: 1 !important; transform: none !important;
+    }
+    .cover-rule { transform: scaleX(1) !important; }
+    .nav-link::after { transform: scaleX(1) !important; opacity: 0.4; }
+    /* El puntero personalizado depende de un lerp por fotograma: se devuelve el nativo. */
+    .cursor-inner, .cursor-outer { display: none; }
+    body, * { cursor: auto !important; }
 }
 </style>
 
@@ -412,6 +591,23 @@ body {
 
 <div class="cursor-inner"></div>
 <div class="cursor-outer"></div>
+
+<section class="hero" id="hero">
+<div class="hero-stage" id="hero-stage">
+
+<div class="hero-cover" id="hero-cover">
+    <div class="cover-kicker">Industria del entretenimiento y modelos publicitarios</div>
+    <h1 class="cover-title">Veintiséis años <br>comprando <br>atención</h1>
+    <p class="cover-standfirst">Del spot de treinta segundos que interrumpía a un país entero, al modelo generativo que fabrica el anuncio para una sola persona. Cinco eras, cinco aparatos y la publicidad que pagó la fiesta.</p>
+    <div class="cover-span">
+        <span class="cover-year">2000</span>
+        <span class="cover-rule" aria-hidden="true"></span>
+        <span class="cover-year">2026</span>
+    </div>
+    <button class="cover-cta" id="cover-cta" type="button">
+        Recorrer la línea de tiempo <span class="cta-arrow" aria-hidden="true">↓</span>
+    </button>
+</div>
 
 <div class="cinematic-container">
 
@@ -530,11 +726,6 @@ body {
     </div>
 </div>
 
-<div class="hint" id="hint">
-    <span>Desplaza</span>
-    <div class="hint-line"></div>
-</div>
-
 <div class="grid-horizontal-line"></div>
 <div class="grid-lines">
     <div class="grid-line"><div class="grid-dot top"></div><div class="grid-dot bottom"></div></div>
@@ -555,6 +746,11 @@ body {
 </div>
 
 <canvas id="webgl"></canvas>
+
+</div><!-- /.hero-stage -->
+</section><!-- /#hero -->
+
+<!-- El GRID de las cinco eras se monta aquí en el siguiente bloque. -->
 
 <script type="module">
 import * as THREE from 'three';
@@ -1259,13 +1455,14 @@ function onWindowResize() {
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     if (shaderUniforms) shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
+    measureLayout();
 }
 
 /* =========================================================
    TEXTO: LETRA A LETRA
    ========================================================= */
 function splitTitlesIntoChars() {
-    const titles = document.querySelectorAll('.slide-title');
+    const titles = document.querySelectorAll('.slide-title, .cover-title');
     titles.forEach(title => {
         const text = title.innerHTML;
         let newHTML = '';
@@ -1361,17 +1558,77 @@ const elEra = document.getElementById('yt-era');
 const elDevice = document.getElementById('yt-device');
 const elFill = document.getElementById('timeline-fill');
 const elMarker = document.getElementById('timeline-marker');
-const elHint = document.getElementById('hint');
 const elMonitor = document.getElementById('monitor');
 const labelSpans = document.querySelectorAll('#timeline-labels span');
 const navLinks = document.querySelectorAll('.nav-link');
+
+/* Elementos y umbrales del hero. Todo lo ajustable del bloque vive aquí. */
+const heroEl = document.getElementById('hero');
+const heroStage = document.getElementById('hero-stage');
+const heroCover = document.getElementById('hero-cover');
+const coverCta = document.getElementById('cover-cta');
+const hudEls = [document.querySelector('.year-ticker'), document.querySelector('.timeline')];
+
+const REDUCE_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const HERO = {
+    COVER_FADE_END: 0.045,    // la portada se disuelve en el primer 4.5% del hero
+    COVER_RISE: 48,           // px que sube la portada al salir
+    STAGE_FADE_START: 0.955,  // el escenario 3D empieza a ceder el paso al grid
+    SCROLL_LERP: 0.025,       // inercia del recorrido (0 = congelado, 1 = sin inercia)
+    CTA_TARGET: 0.10          // adonde salta el CTA: primera era ya asentada
+};
+
+/* La primera era arranca después de la portada, no en 0, para que titular
+   y slide-1 no se pisen. El resto de rangos no se toca. */
 const SLIDE_RANGES = [
-    [-0.10, 0.10],
+    [0.055, 0.155],
     [0.19, 0.31],
     [0.44, 0.56],
     [0.69, 0.81],
-    [0.92, 1.05]
+    [0.88, 1.00]
 ];
+
+/** Progreso 0..1 dentro del hero, medido contra la propia sección.
+ *  Independiente de lo que venga debajo (grid, modal), así que añadir
+ *  secciones nuevas no altera la escena. */
+function heroSpan() {
+    return Math.max(1, heroEl.offsetHeight - window.innerHeight);
+}
+function heroProgress() {
+    return clamp(-heroEl.getBoundingClientRect().top / heroSpan(), 0, 1);
+}
+
+/* Mientras el hero sea lo único que hay en la página, apagarlo al final
+   dejaría pantalla negra. El fundido de salida solo se activa cuando
+   existe algo debajo a lo que cederle el paso. Se mide en resize, no por
+   fotograma, para no forzar layout en el bucle. */
+let hasContentBelow = false;
+function measureLayout() {
+    hasContentBelow = document.documentElement.scrollHeight > heroEl.offsetHeight + 4;
+}
+
+/** Portada y salida del hero van acopladas al scroll físico (sin transición
+ *  CSS): si se temporizaran, el elemento "flotaría" por detrás del dedo. */
+function updateHeroChrome(p) {
+    const out = clamp(p / HERO.COVER_FADE_END, 0, 1);
+    heroCover.style.opacity = String(1 - out);
+    heroCover.style.transform = `translateY(${-out * HERO.COVER_RISE}px)`;
+    heroCover.style.pointerEvents = out > 0.5 ? 'none' : '';
+    heroCover.setAttribute('aria-hidden', out >= 1 ? 'true' : 'false');
+
+    // El HUD de año y la línea de tiempo relevan a la portada: entran a la
+    // misma velocidad a la que ella se va, sin solaparse.
+    for (const el of hudEls) if (el) el.style.opacity = String(out);
+
+    // Últimos 4.5%: el escenario se apaga y deja el sitio al grid.
+    const exit = hasContentBelow
+        ? clamp((p - HERO.STAGE_FADE_START) / (1 - HERO.STAGE_FADE_START), 0, 1)
+        : 0;
+    heroStage.style.opacity = String(1 - exit);
+    heroStage.style.visibility = exit >= 1 ? 'hidden' : 'visible';
+    heroStage.style.pointerEvents = exit > 0.6 ? 'none' : '';
+}
 
 let lastYear = -1, lastEra = -1;
 
@@ -1391,7 +1648,6 @@ function updateHUD(scroll) {
 
     elFill.style.width = `${s * 100}%`;
     elMarker.style.left = `${s * 100}%`;
-    elHint.classList.toggle('hidden', s > 0.012);
 }
 
 function updateSlides(scroll) {
@@ -1438,12 +1694,16 @@ function animate() {
     const deltaTime = clock.getDelta();
     const time = clock.getElapsedTime();
 
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollTop = window.scrollY !== undefined ? window.scrollY
-        : (window.pageYOffset !== undefined ? window.pageYOffset : document.documentElement.scrollTop);
-    const targetScroll = maxScroll > 0 ? scrollTop / maxScroll : 0;
+    // Progreso crudo del hero. Manda en portada y salida, que deben ir
+    // pegadas al dedo; el recorrido de la escena sí lleva inercia.
+    const targetScroll = heroProgress();
+    updateHeroChrome(targetScroll);
 
-    currentScroll += (targetScroll - currentScroll) * 0.025;
+    // Hero fuera de pantalla: se detiene el trabajo de GPU y de DOM mientras
+    // el usuario está en las secciones siguientes.
+    if (heroStage.style.visibility === 'hidden') return;
+
+    currentScroll += (targetScroll - currentScroll) * (REDUCE_MOTION ? 1 : HERO.SCROLL_LERP);
 
     mouseX += (targetMouseX - mouseX) * 0.05;
     mouseY += (targetMouseY - mouseY) * 0.05;
@@ -1551,20 +1811,27 @@ function animate() {
 /* =========================================================
    NAVEGACIÓN Y PUNTERO
    ========================================================= */
+function scrollToHero(t) {
+    window.scrollTo({
+        top: heroEl.offsetTop + heroSpan() * t,
+        behavior: REDUCE_MOTION ? 'auto' : 'smooth'
+    });
+}
+
 function setupNavigation() {
-    const targetScrolls = [0.0, 0.25, 0.5, 0.75, 1.0];
+    const targetScrolls = [0.10, 0.25, 0.5, 0.75, 1.0];
     navLinks.forEach((link, index) => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-            window.scrollTo({ top: maxScroll * targetScrolls[index], behavior: 'smooth' });
+            scrollToHero(targetScrolls[index]);
         });
     });
     const restart = document.getElementById('restart-btn');
     if (restart) restart.addEventListener('click', (e) => {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        scrollToHero(0);
     });
+    if (coverCta) coverCta.addEventListener('click', () => scrollToHero(HERO.CTA_TARGET));
 }
 
 window.addEventListener('mousemove', (event) => {
@@ -1586,6 +1853,10 @@ onWindowResize();
 drawMonitor(0);
 animate();
 setupNavigation();
+
+// La portada arranca su entrada un fotograma después del split, para que las
+// letras partan del estado inicial y no salten ya colocadas.
+requestAnimationFrame(() => heroCover.classList.add('ready'));
 </script>
 </body>
 </html>
