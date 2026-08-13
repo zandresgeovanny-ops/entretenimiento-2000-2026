@@ -593,10 +593,12 @@ a:focus-visible, button:focus-visible {
     #slide-3, #slide-4, #slide-5 { position: static; width: 100%; max-width: 100%; }
     #slide-1 .col-2 { display: none; }
     #slide-3 .slide-title { white-space: normal; }
-    .slide-title { font-size: 54px; }
-    .slide-desc { font-size: 14px; }
+    /* Sigue acotado por altura: un móvil apaisado tiene tan poco alto como el
+       portátil donde apareció la colisión original. */
+    .slide-title { font-size: clamp(26px, min(8.4vw, 9vh), 54px); }
+    .slide-desc { font-size: clamp(12px, min(3.4vw, 2.4vh), 14px); }
     .year-ticker { top: 84px; right: 24px; }
-    .yt-year { font-size: 40px; }
+    .yt-year { font-size: clamp(24px, min(8vw, 7vh), 40px); }
     .yt-device { display: none; }
     .timeline { left: 24px; right: 24px; }
     .hero-cover { left: 24px; right: 24px; width: auto; bottom: 20%; }
