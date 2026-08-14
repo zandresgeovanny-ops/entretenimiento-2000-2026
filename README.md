@@ -2,7 +2,9 @@
 
 Pieza editorial de scroll cinematográfico sobre la **evolución de la industria del entretenimiento y sus modelos publicitarios** entre 2000 y 2026.
 
-Un aparato electrónico flota en un escenario negro y **va cambiando con los años** conforme se hace scroll: televisor de tubo → reproductor MP3 → teléfono inteligente → pantalla conectada → visor de realidad mixta. La cámara orbita 360°, el fondo es un shader de onda que migra de fósforo ámbar a índigo sintético, y un panel lateral muestra cómo se reparte la inversión publicitaria en cada época.
+Un aparato electrónico flota en un escenario negro y **va cambiando con los años** conforme se hace scroll: televisor de tubo → reproductor MP3 → teléfono inteligente → pantalla conectada → visor de realidad mixta. La cámara orbita 360°, el fondo es un shader de onda que migra de fósforo ámbar a índigo sintético, y una ficha lateral cuenta cada año: contexto, ventaja, modelo publicitario y tres desventajas. La ficha cambia de lado en cada relevo, con salida y entrada animadas.
+
+El aparato se puede girar arrastrándolo con el cursor o el dedo, para verlo de frente cuando la órbita de la cámara lo deja de espaldas. El giro se conserva al cambiar de año.
 
 ## Las cinco épocas
 
@@ -16,7 +18,7 @@ Un aparato electrónico flota en un escenario negro y **va cambiando con los añ
 
 ## Procedencia de los datos
 
-El panel lateral reparte el gasto publicitario mundial entre seis canales. **Los dos extremos de la serie están publicados; los tres tramos intermedios son interpolación entre ellos**, y la pieza lo declara en pantalla: el pie del panel dice «dato publicado» o «interpolado» según la era que estés viendo.
+El modal de cada era reparte el gasto publicitario mundial entre seis canales. **Los dos extremos de la serie están publicados; los tres tramos intermedios son interpolación entre ellos**, y la pieza lo declara en pantalla: el pie del modal dice «dato publicado» o «interpolado» según la era que estés abriendo.
 
 | Era | Procedencia | Referencia |
 |---|---|---|
@@ -26,7 +28,7 @@ El panel lateral reparte el gasto publicitario mundial entre seis canales. **Los
 | 2018–2022 | Interpolado | — |
 | 2023–2026 | Publicado | Digital = 73 % del gasto mundial (740 mM $ de 1,06 B $); dentro del digital, buscador 40 %, display 18 %, social 32 %, vídeo/CTV 10 %; retail media 62 mM $; TV lineal ~11 % ([dentsu](https://www.dentsu.com/news-releases/ad-spend-growth-is-projected-to-slow-to-5-percent-in-2026-still-outpacing-economic-growth), [Digital Applied](https://www.digitalapplied.com/blog/digital-advertising-statistics-2026-data-points)) |
 
-Las cinco columnas suman 100 % y la serie es monótona en las dos direcciones que cuenta la pieza: TV lineal e impresos caen sin repuntes, buscador y social suben sin retrocesos.
+Las cinco columnas suman 100 %. Buscador y social suben sin retrocesos en toda la serie. La TV lineal no: va de 37 % a 38 % entre el primer y el segundo tramo antes de caer a 36 %, 22 % y 11 %. Ese repunte es un artefacto del reparto interpolado, no un dato publicado; los únicos valores con fuente son los de 2005 y los de 2026.
 
 ## Seguridad
 
@@ -36,13 +38,19 @@ Las cinco columnas suman 100 % y la serie es monótona en las dos direcciones qu
 
 - Un solo archivo: `index.html`. Sin build, sin framework, sin bundler.
 - Three.js r0.160 vía importmap desde unpkg (única dependencia externa junto a Google Fonts).
-- Los cinco aparatos son **geometría procedural** — no hay ningún modelo `.glb` ni imagen que descargar.
+- Los 27 aparatos son **geometría procedural** sobre 12 arquetipos reutilizados: no hay ningún modelo `.glb` ni imagen que descargar.
 - Shader GLSL de onda de fondo, 450 partículas aditivas, iluminación de tres puntos con sombras suaves.
-- Página de 900vh; todo el movimiento se deriva del scroll con suavizado por lerp.
+- Hero de 2700vh; todo el movimiento se deriva del scroll con suavizado por lerp.
+- Un solo aparato en pantalla en cualquier punto del recorrido, y una sola caja de texto: la superposición no se evita ajustando márgenes, se evita porque no hay una segunda caja con la que chocar.
+- `prefers-reduced-motion` retira desplazamientos y desenfoques y conserva los cambios de estado.
 
 ## Ejecutar en local
 
-Los módulos ES no funcionan con `file://`, hace falta un servidor estático:
+Los módulos ES no funcionan con `file://`, hace falta un servidor estático. Cualquiera de los dos sirve:
+
+```bash
+python -m http.server 8080
+```
 
 ```bash
 npx serve .
@@ -50,4 +58,4 @@ npx serve .
 
 ## Despliegue
 
-Sitio estático puro: Vercel lo publica sin configuración (sin `vercel.json`, sin build command).
+Sitio estático puro, sin build command. `git push` a `main` y Vercel redespliega solo, aplicando las cabeceras de `vercel.json`.

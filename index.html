@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Atención · 2000—2026 · Entretenimiento y publicidad</title>
-<meta name="description" content="Veintiséis años de industria del entretenimiento y sus modelos publicitarios, del rating televisivo a la atención sintética.">
+<meta name="description" content="Veintisiete años de industria del entretenimiento y sus modelos publicitarios, del rating televisivo a la atención sintética.">
 <meta name="theme-color" content="#000000">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,12 +36,14 @@
     /* Escala tipográfica fluida.
        Clave: el límite se toma de `min(vw, vh)`. El fallo original venía de
        fijar 116px por ancho: en una pantalla de 1328×568 el título medía lo
-       mismo que en un monitor alto y se comía el panel de datos. Al acotar
+       mismo que en una pantalla alta y se comía la ficha del año. Al acotar
        también por altura, el titular cede espacio en viewports apaisados. */
     --fs-display: clamp(34px, min(6.6vw, 12.5vh), 104px);  /* portada */
     --fs-title:   clamp(30px, min(5.6vw, 10.5vh), 88px);   /* títulos de era */
     --fs-body:    clamp(13px, min(1.05vw, 2.6vh), 16px);
     --fs-stand:   clamp(14px, min(1.15vw, 2.9vh), 17px);
+    --fs-section: clamp(26px, min(3.6vw, 7vh), 58px);       /* titular del grid */
+    --fs-card:    clamp(17px, min(1.55vw, 3.4vh), 24px);    /* nombre de era en tarjeta */
 }
 
 html { color-scheme: dark; }
@@ -94,6 +96,17 @@ body {
     width: 100%; height: 100%;
     z-index: 1;
     outline: none;
+    /* El lienzo captura el arrastre horizontal para girar el aparato y cede el
+       vertical al navegador: la pieza se recorre con scroll y perderlo la
+       dejaría inservible en táctil. */
+    touch-action: pan-y;
+}
+/* El puntero nativo está oculto en toda la pieza, así que el estado de
+   arrastre se señala engordando el anillo del cursor propio. */
+body.model-drag .cursor-outer {
+    width: 26px; height: 26px;
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.95);
 }
 
 /* ---------------- cursor ---------------- */
@@ -317,140 +330,161 @@ a:focus-visible, button:focus-visible {
 .hero-cover.ready .cover-cta:hover .cta-arrow,
 .hero-cover.ready .cover-cta:focus-visible .cta-arrow { transform: translateY(4px); }
 
-/* ---------------- panel de año (caja única) ---------------- */
+/* =========================================================
+   FICHA DEL AÑO (caja única)
+   Una sola caja de texto en pantalla para los 27 años: la superposición
+   es imposible por construcción, no por ajuste de márgenes, porque no
+   existe una segunda caja con la que chocar.
+
+   Antes era texto suelto con sombra sobre el lienzo y se perdía contra la
+   escena. Ahora es una superficie con borde, fondo propio y una barra del
+   color de la era: se lee como objeto, no como marca de agua.
+   ========================================================= */
 .year-panel {
-    position: absolute;
-    left: 0; bottom: 11%;
-    /* Ancho acotado a la mitad del ancho útil: el aparato 3D respira a la
-       derecha y el texto nunca lo cruza. */
-    width: min(46vw, 560px);
+    position: fixed;
+    bottom: clamp(88px, 11vh, 132px);
+    /* Acotado también por altura: en un portátil apaisado la ficha cede
+       espacio antes que invadir el HUD superior o la línea de tiempo. */
+    width: min(38vw, 460px);
+    max-height: calc(100vh - 250px);
+    z-index: 11;
     pointer-events: none;
+    padding: clamp(16px, 2.4vh, 26px) clamp(18px, 1.8vw, 28px);
+    background:
+        linear-gradient(180deg, rgba(10, 11, 14, 0.90), rgba(6, 6, 9, 0.80));
+    backdrop-filter: blur(20px) saturate(1.25);
+    -webkit-backdrop-filter: blur(20px) saturate(1.25);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.62),
+                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    /* --era-glow lo escribe updateYearPanel: la barra es el único elemento
+       cromático del bloque y ancla la ficha a la era que se está viendo. */
+    border-left: 2px solid var(--era-glow, #ffb14a);
+    /* Red de seguridad: si algún viewport deja menos altura de la prevista, la
+       ficha se recorta dentro de su propia caja en vez de derramar texto sobre
+       la línea de tiempo. Las reglas de `max-height` de más abajo están para
+       que este recorte no llegue a ocurrir en pantallas reales. */
+    overflow: hidden;
+}
+
+/* Dos anclajes. El aparato 3D vive en el centro, así que la ficha solo
+   ocupa un tercio lateral y deja el modelo siempre despejado. */
+.year-panel.side-l { left: var(--gutter); }
+.year-panel.side-r { right: var(--gutter); }
+/* El anclaje derecho comparte columna con el ticker del año, que ocupa los
+   ~183px superiores. La ficha se ancla por abajo, así que su borde superior
+   sube con el contenido: sin este tope, una ficha larga en el lado derecho
+   volvería a meterse debajo del rótulo. Medido: la más alta de las trece que
+   caen a la derecha mide 512px, así que 520px no recorta ninguna. */
+.year-panel.side-r { max-height: calc(100vh - 280px); }
+
+.yp-head {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: clamp(4px, 0.8vh, 10px);
 }
 .yp-count {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px; letter-spacing: 3px;
     color: rgba(255, 255, 255, 0.42);
     font-variant-numeric: tabular-nums;
-    margin-bottom: 14px;
 }
 .yp-year {
     font-family: 'Italiana', serif;
-    font-size: var(--fs-title);
+    font-size: clamp(30px, min(3.4vw, 7vh), 62px);
     line-height: 0.95;
     font-weight: 400;
-    letter-spacing: 3px;
+    letter-spacing: 2px;
     color: #fff6ed;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.8);
-    margin-bottom: clamp(6px, 1.2vh, 14px);
 }
 .yp-device {
-    font-size: clamp(15px, min(1.6vw, 3.2vh), 26px);
+    font-size: clamp(15px, min(1.5vw, 3vh), 23px);
     font-weight: 300;
-    letter-spacing: 0.5px;
-    color: #e7ebf0;
+    letter-spacing: 0.3px;
+    color: #ffffff;
     text-wrap: balance;
-    text-shadow: 0 1px 14px rgba(0, 0, 0, 0.9);
-    margin-bottom: clamp(12px, 2.2vh, 26px);
+    margin-bottom: clamp(8px, 1.4vh, 14px);
 }
-.yp-rows { display: flex; flex-direction: column; gap: clamp(6px, 1.1vh, 11px); }
-.yp-row {
-    display: flex; align-items: baseline; gap: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.13);
-    padding-top: clamp(5px, 0.9vh, 9px);
-}
-.yp-row dt {
-    flex: 0 0 auto;
-    width: 148px;
+/* Sector, modelo publicitario y era en una sola tira: tres filas de lista
+   costaban 60px de alto que aquí hacen falta para el texto del año. */
+.yp-strip {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.46);
+    line-height: 1.7;
+    padding-bottom: clamp(10px, 1.6vh, 16px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: clamp(10px, 1.6vh, 16px);
 }
-.yp-row dd {
-    /* min-width:0 permite que el texto largo se recorte en vez de empujar
-       la fila y desbordar el panel. */
-    min-width: 0; flex: 1 1 auto;
-    font-size: var(--fs-body);
-    font-weight: 300;
-    color: #d5dae1;
-    overflow-wrap: break-word;
-    text-shadow: 0 1px 10px rgba(0, 0, 0, 0.9);
-}
+.yp-strip b { color: rgba(255, 255, 255, 0.72); font-weight: 400; }
 
-/* El contenido del panel se releva: sale, cambia, entra. Nunca se solapan
-   dos años porque es el mismo nodo el que se reescribe. */
-.year-panel .yp-year,
-.year-panel .yp-device,
-.year-panel .yp-rows,
-.year-panel .yp-count {
-    transition: opacity 260ms var(--ease-micro), transform 260ms var(--ease-micro);
+.yp-desc {
+    font-size: clamp(12.5px, min(0.94vw, 2.3vh), 15px);
+    line-height: 1.62;
+    font-weight: 300;
+    color: #d9dee5;
+    text-wrap: pretty;
+    margin-bottom: clamp(10px, 1.6vh, 16px);
 }
-.year-panel.swapping .yp-year,
-.year-panel.swapping .yp-device,
-.year-panel.swapping .yp-rows,
-.year-panel.swapping .yp-count {
+.yp-h {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 2.4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+    margin-bottom: 5px;
+}
+.yp-adv {
+    font-size: clamp(12px, min(0.88vw, 2.2vh), 14px);
+    line-height: 1.6; font-weight: 300;
+    color: #c6ccd4;
+    margin-bottom: clamp(10px, 1.6vh, 16px);
+}
+.yp-dis { display: flex; flex-direction: column; gap: clamp(5px, 0.9vh, 9px); }
+.yp-dis li {
+    list-style: none;
+    font-size: clamp(11.5px, min(0.84vw, 2.1vh), 13.5px);
+    line-height: 1.55; font-weight: 300;
+    color: #a9b0b9;
+    padding-left: 13px;
+    position: relative;
+}
+.yp-dis li::before {
+    content: ''; position: absolute;
+    left: 0; top: 0.62em;
+    width: 5px; height: 1px;
+    background: rgba(255, 255, 255, 0.34);
+}
+.yp-dis b { color: #e6ebf1; font-weight: 500; }
+
+/* El relevo: la ficha entera sale, cambia de lado y vuelve a entrar. Se
+   anima el bloque completo y no cada hijo por separado, porque el cambio
+   de posición es parte del mensaje: si algo se mueve, algo ha cambiado. */
+.year-panel {
+    --out-x: 0px;
+    transition: opacity 300ms var(--ease-micro),
+                transform 380ms var(--ease-editorial),
+                filter 300ms var(--ease-micro),
+                border-left-color 700ms linear;
+    will-change: transform, opacity;
+}
+.year-panel.swapping {
+    opacity: 0;
+    transform: translate(var(--out-x), 12px);
+    filter: blur(5px);
+}
+/* Mientras la portada sigue en pantalla la ficha está guardada. El ticker y la
+   línea de tiempo sí pueden cruzarse con el titular —son hilos finos—, pero
+   esta es una caja opaca del ancho de media columna: si entra a la vez que la
+   portada, se leen las dos superpuestas. Entra cuando la portada ya se ha ido.
+   Va después de `.swapping` a propósito: misma especificidad, gana la última,
+   y así el estado guardado manda sobre el relevo. */
+.year-panel.stowed {
     opacity: 0;
     transform: translateY(14px);
+    filter: blur(4px);
 }
 
-/* ---------------- slides (portada) ---------------- */
-.slide { position: absolute; bottom: 12%; pointer-events: none; }
-
-.slide-era {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px; letter-spacing: 4px; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.5);
-    margin-bottom: 18px;
-    opacity: 0; transform: translateY(16px);
-    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    transition-delay: 0.1s;
-}
-.slide.active .slide-era { opacity: 1; transform: translateY(0); }
-
-.slide-title {
-    font-family: 'Italiana', serif;
-    font-size: var(--fs-title);
-    line-height: 1.0;
-    font-weight: 400;
-    letter-spacing: 2px;
-    margin-bottom: clamp(10px, 1.6vh, 20px);
-    color: #fff6ed;
-    text-wrap: balance;
-    /* El titular flota sobre un modelo 3D iluminado: sin sombra propia hay
-       tramos donde el texto claro cae sobre metal claro. */
-    text-shadow: 0 2px 28px rgba(0, 0, 0, 0.75);
-}
-.slide-desc {
-    font-size: var(--fs-body); line-height: 1.7; font-weight: 300;
-    color: #d1d5db; letter-spacing: 0.5px;
-    text-wrap: pretty;
-    text-shadow: 0 1px 12px rgba(0, 0, 0, 0.9);
-    opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1),
-                transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    transition-delay: 0.4s;
-}
-.slide.active .slide-desc { opacity: 1; transform: translateY(0); }
-
-.slide-tags {
-    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px;
-    opacity: 0; transform: translateY(20px);
-    transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
-    transition-delay: 0.62s;
-}
-.slide.active .slide-tags { opacity: 1; transform: translateY(0); }
-.tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase;
-    padding: 6px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    color: rgba(255, 255, 255, 0.72);
-    white-space: nowrap;
-}
-
-.slide-title .char, .cover-title .char {
+/* ---------------- troceado por letras del titular de portada ---------------- */
+.cover-title .char {
     display: inline-block;
     opacity: 0;
     transform: translateY(50px);
@@ -459,90 +493,13 @@ a:focus-visible, button:focus-visible {
                 transform var(--dur-text) var(--ease-editorial),
                 filter var(--dur-text) var(--ease-editorial);
 }
-.slide.active .slide-title .char,
 .hero-cover.ready .cover-title .char { opacity: 1; transform: translateY(0); filter: blur(0); }
-.slide.active { pointer-events: auto; }
 
-#slide-1 { left: 0; width: 100%; }
-#slide-1 .slide-era { margin-left: 60px; }
-#slide-1 .slide-title { margin-left: 60px; }
-#slide-1 .desc-row { position: relative; display: flex; width: 100%; }
-#slide-1 .col-1 {
-    margin-left: 60px;
-    width: calc(25vw - 60px);
-    max-width: calc(25vw - 60px);
-}
-#slide-1 .col-2 {
-    position: absolute;
-    left: calc(25vw + 40px);
-    width: calc(25vw - 60px);
-    max-width: calc(25vw - 60px);
-}
-
-#slide-2 { left: 0; width: 100%; }
-#slide-2 .slide-era { margin-left: calc(25vw + 40px); }
-#slide-2 .slide-title { margin-left: calc(25vw + 40px); }
-#slide-2 .slide-desc, #slide-2 .slide-tags {
-    margin-left: calc(50vw + 20px);
-    width: calc(25vw - 60px);
-    max-width: calc(25vw - 60px);
-}
-
-#slide-3 {
-    left: calc(50vw + 20px);
-    width: calc(25vw - 60px);
-    max-width: calc(25vw - 60px);
-}
-#slide-3 .slide-title { white-space: nowrap; }
-
-#slide-4 { left: calc(25% + 40px); max-width: min(46vw, 600px); }
-
-/* slide-5 ocupaba la columna 1, la misma que el panel de datos: en viewports
-   cortos el titular subía hasta cruzarse con él. Se mueve a la columna 2. */
-#slide-5 { left: calc(25vw + 40px); max-width: min(46vw, 620px); }
-
-/* ---------------- monitor (panel de inversión publicitaria) ---------------- */
-.monitor {
-    position: fixed;
-    top: 92px;
-    left: 60px;
-    width: calc(25vw - 60px);
-    min-width: 230px;
-    max-width: 360px;
-    z-index: 6;
-    pointer-events: none;
-    clip-path: inset(0 0 100% 0);
-    opacity: 0;
-    transition: clip-path 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.8s ease;
-}
-.monitor.active { clip-path: inset(0 0 0 0); opacity: 1; }
-.monitor-frame {
-    position: relative;
-    aspect-ratio: 1 / 1;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    background: rgba(4, 4, 6, 0.55);
-}
-.monitor-frame canvas {
-    width: 100%; height: 100%; display: block;
-    transform: scale(1.12);
-    transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.monitor.active .monitor-frame canvas { transform: scale(1); }
-.monitor-scan {
-    position: absolute; inset: 0;
-    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0) 1px 3px);
-    pointer-events: none;
-}
-.monitor-cap {
-    margin-top: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.38);
-    line-height: 1.6;
-}
-
-/* ---------------- HUD año / era / dispositivo ---------------- */
+/* ---------------- HUD del año ---------------- */
+/* Solo la cifra del año. El nombre del aparato y el de la era vivían también
+   aquí, y esa duplicación era la que se veía superpuesta: la misma frase
+   impresa en dos superficies distintas que se cruzan cuando la ficha cambia
+   de lado. Cada dato se escribe ahora en un único sitio. */
 .year-ticker {
     position: fixed;
     top: 96px; right: 60px;
@@ -569,17 +526,24 @@ a:focus-visible, button:focus-visible {
     font-variant-numeric: tabular-nums;
     text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
 }
-.yt-era {
-    margin-top: 12px;
-    font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.6);
-}
-.yt-device {
-    margin-top: 6px;
+/* Un gesto que nadie anuncia no existe. La pista se retira para siempre en
+   cuanto el visitante arrastra una vez: ya no tiene nada que enseñar. */
+.yt-hint {
+    /* Cada píxel del ticker empuja hacia abajo el borde superior que la ficha
+       del lado derecho tiene que esquivar, así que el margen es el mínimo que
+       aún separa el rótulo del año. */
+    margin-top: 8px;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px; letter-spacing: 2px;
-    color: rgba(255, 255, 255, 0.35);
+    font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.34);
+    transition: opacity 600ms var(--ease-micro);
 }
+.yt-hint::before {
+    content: ''; display: inline-block;
+    width: 16px; height: 1px; margin-right: 8px; vertical-align: middle;
+    background: rgba(255, 255, 255, 0.34);
+}
+body.drag-known .yt-hint { opacity: 0; }
 
 /* ---------------- línea de tiempo inferior ---------------- */
 .timeline {
@@ -652,37 +616,322 @@ a:focus-visible, button:focus-visible {
 /* ---------------- responsive ---------------- */
 @media (max-width: 1180px) {
     .yt-year { font-size: clamp(34px, 5vh, 56px); }
-    .monitor { max-width: 260px; }
+    .year-panel { width: min(46vw, 420px); }
 }
-/* El panel de datos es enriquecimiento, no contenido esencial: por debajo de
-   760px de alto no cabe junto al texto de la era y se retira antes que
-   provocar la colisión. Su información sigue en el texto de cada slide. */
-@media (max-height: 760px) {
-    .monitor { display: none; }
+/* =========================================================
+   GRID DE LAS CINCO ERAS
+   Sección hermana del hero. Su mera existencia es lo que enciende
+   `hasContentBelow` y, con él, el fundido de salida del escenario 3D:
+   hasta ahora ese fundido estaba cableado pero inerte, porque apagar el
+   hero sin nada debajo solo dejaba pantalla negra.
+   ========================================================= */
+#grid {
+    position: relative;
+    z-index: 4;
+    background: #000000;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: clamp(64px, 10vh, 140px) var(--gutter) clamp(88px, 14vh, 180px);
+}
+
+.grid-head { max-width: 62ch; margin-bottom: clamp(38px, 6vh, 70px); }
+
+.grid-kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 22px;
+}
+.grid-title {
+    font-family: 'Italiana', serif;
+    font-size: var(--fs-section);
+    line-height: 1.04;
+    font-weight: 400;
+    letter-spacing: 1px;
+    color: #fff6ed;
+    margin-bottom: clamp(14px, 2.2vh, 26px);
+    text-wrap: balance;
+}
+.grid-standfirst {
+    font-size: var(--fs-stand); line-height: 1.65; font-weight: 300;
+    color: #b9bec6; letter-spacing: 0.3px;
+    max-width: 52ch;
+    text-wrap: pretty;
+}
+
+.era-grid {
+    display: grid;
+    /* `auto-fit` + `minmax` reparte solo: cinco columnas en escritorio ancho,
+       y va plegando a tres, dos y una sin necesidad de puntos de ruptura. */
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+    gap: clamp(14px, 1.6vw, 26px);
+}
+
+/* La tarjeta es un <button>: foco, Enter y Espacio salen gratis del navegador
+   en vez de reimplantarse a mano sobre un <div>. */
+.era-card {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    padding: clamp(20px, 1.7vw, 30px);
+    background: rgba(255, 255, 255, 0.028);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 3px;
+    cursor: pointer;
+    scroll-margin-top: 90px;   /* los enlaces de la nav no lo pegan al borde */
+
+    /* Estado de entrada; `.in` lo revierte cuando el observador lo ve. */
+    opacity: 0;
+    transform: translateY(34px);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial),
+                border-color var(--dur-micro) var(--ease-micro),
+                background-color var(--dur-micro) var(--ease-micro);
+}
+.era-card.in { opacity: 1; transform: translateY(0); }
+.era-card:hover,
+.era-card:focus-visible {
+    background: rgba(255, 255, 255, 0.055);
+    border-color: rgba(255, 255, 255, 0.28);
+}
+.era-card:focus-visible { outline: 2px solid #7fe0a8; outline-offset: 3px; }
+
+.card-years {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.5);
+}
+.card-era {
+    font-family: 'Italiana', serif;
+    font-size: var(--fs-card);
+    line-height: 1.12;
+    letter-spacing: 0.5px;
+    color: #fff6ed;
+}
+.card-count {
+    font-size: 12px; font-weight: 300; letter-spacing: 0.3px;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+/* Barra compacta del reparto: los seis tramos con los colores de CATS[].
+   Es decorativa —la cifra exacta vive en el modal—, así que se oculta al
+   lector de pantalla en vez de leerle seis porcentajes sin contexto. */
+.card-bar {
+    display: flex;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.06);
+    margin-top: auto;
+}
+.card-bar span { display: block; height: 100%; }
+
+.card-open {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+    transition: color var(--dur-micro) var(--ease-micro);
+}
+.era-card:hover .card-open,
+.era-card:focus-visible .card-open { color: rgba(255, 255, 255, 0.8); }
+
+/* =========================================================
+   MODAL DE ERA
+   Un solo diálogo reutilizado por las cinco tarjetas.
+   ========================================================= */
+.era-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(16px, 4vh, 48px);
+}
+/* Sin esto, el `display: flex` de arriba anularía el atributo `hidden`. */
+.era-modal[hidden] { display: none; }
+
+.modal-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(6px);
+}
+
+.modal-card {
+    position: relative;
+    width: min(920px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    padding: clamp(26px, 3vw, 48px);
+    background: #0a0a0c;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 4px;
+    box-shadow: 0 30px 90px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    transform: translateY(24px) scale(0.985);
+    transition: opacity var(--dur-text) var(--ease-editorial),
+                transform var(--dur-text) var(--ease-editorial);
+}
+.era-modal.open .modal-card { opacity: 1; transform: translateY(0) scale(1); }
+
+.modal-close {
+    position: absolute; top: 14px; right: 16px;
+    width: 38px; height: 38px;
+    font: 400 24px/1 'Outfit', sans-serif;
+    color: rgba(255, 255, 255, 0.55);
+    background: none; border: 1px solid transparent; border-radius: 3px;
+    cursor: pointer;
+    transition: color var(--dur-micro) var(--ease-micro),
+                border-color var(--dur-micro) var(--ease-micro);
+}
+.modal-close:hover, .modal-close:focus-visible {
+    color: #fff; border-color: rgba(255, 255, 255, 0.3);
+}
+.modal-close:focus-visible { outline: 2px solid #7fe0a8; outline-offset: 2px; }
+
+.modal-kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 3px;
+    color: rgba(255, 255, 255, 0.5);
+    margin-bottom: 12px;
+}
+.modal-title {
+    font-family: 'Italiana', serif;
+    font-size: clamp(24px, min(3vw, 5.6vh), 44px);
+    font-weight: 400; letter-spacing: 0.5px; line-height: 1.1;
+    color: #fff6ed;
+    margin-bottom: clamp(22px, 3vh, 36px);
+    padding-right: 44px;   /* deja sitio al botón de cierre */
+}
+
+.modal-cols {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: clamp(24px, 3vw, 52px);
+}
+.modal-h {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 3px; text-transform: uppercase;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.42);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-years { list-style: none; }
+.modal-years li {
+    display: grid;
+    grid-template-columns: 4.5ch 1fr;
+    gap: 14px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.055);
+}
+.modal-years li:last-child { border-bottom: 0; }
+.my-y {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px; color: rgba(255, 255, 255, 0.75);
+    padding-top: 2px;
+}
+.my-dev { font-size: 14px; font-weight: 300; color: #e8eaee; letter-spacing: 0.2px; }
+.my-meta {
+    font-size: 12px; font-weight: 300; letter-spacing: 0.2px;
+    color: rgba(255, 255, 255, 0.42);
+    margin-top: 3px;
+}
+
+.modal-spend { list-style: none; }
+.modal-spend li {
+    display: grid;
+    grid-template-columns: 10px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 0;
+}
+.ms-dot { width: 10px; height: 10px; border-radius: 2px; }
+.ms-name { font-size: 13px; font-weight: 300; color: #d6d9de; }
+.ms-pct {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px; color: #fff;
+}
+/* Invariante nº4: la pieza declara siempre qué es dato y qué interpolación.
+   Retirado el panel de inversión del hero, el modal es el único sitio donde
+   vive esa declaración, así que aquí no puede faltar. */
+.modal-prov {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px; letter-spacing: 0.5px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.modal-prov.sourced { color: rgba(150, 240, 200, 0.75); }
+.modal-prov.interp  { color: rgba(255, 255, 255, 0.4); }
+
+/* En pantallas bajas la ficha cede aire antes que altura de texto: se
+   comprime el acolchado y sube desde el borde inferior. */
+@media (max-height: 780px) {
+    .year-panel {
+        bottom: 84px;
+        padding: 14px 18px;
+        max-height: calc(100vh - 190px);
+    }
+}
+/* Por debajo de estas alturas ya no cabe la ficha entera. En vez de recortarla
+   por la mitad, se retiran bloques en orden inverso de peso argumental: primero
+   el contexto general, después la ventaja. Lo que sostiene el relato —aparato,
+   modelo publicitario y desventajas— no se va nunca. */
+@media (max-height: 700px) {
+    .yp-desc { display: none; }
+}
+@media (max-height: 600px) {
+    .yp-h-v, #yp-adv { display: none; }
+}
+/* Último escalón, para móviles apaisados: de cada desventaja queda el titular.
+   Tres etiquetas siguen diciendo qué falló ese año; media explicación cortada
+   a mitad de frase no dice nada. */
+@media (max-height: 520px) {
+    .yp-dt { display: none; }
 }
 @media (max-width: 900px) {
     .cinematic-container { padding: 0 24px 30px 24px; }
     .header-nav { display: none; }
-    .monitor { display: none; }
     .grid-lines { display: none; }
-    .slide { bottom: 16%; left: 0 !important; width: 100% !important; max-width: 100% !important; padding: 0 24px; }
-    #slide-1 .slide-era, #slide-1 .slide-title, #slide-1 .col-1,
-    #slide-2 .slide-era, #slide-2 .slide-title, #slide-2 .slide-desc, #slide-2 .slide-tags { margin-left: 0; }
-    #slide-1 .desc-row { display: block; }
-    #slide-1 .col-1, #slide-1 .col-2, #slide-2 .slide-desc, #slide-2 .slide-tags,
-    #slide-3, #slide-4, #slide-5 { position: static; width: 100%; max-width: 100%; }
-    #slide-1 .col-2 { display: none; }
-    #slide-3 .slide-title { white-space: normal; }
-    /* Sigue acotado por altura: un móvil apaisado tiene tan poco alto como el
-       portátil donde apareció la colisión original. */
-    .slide-title { font-size: clamp(26px, min(8.4vw, 9vh), 54px); }
-    .slide-desc { font-size: clamp(12px, min(3.4vw, 2.4vh), 14px); }
-    .year-ticker { top: 84px; right: 24px; }
+    /* La ficha ocupa el ancho completo en móvil, así que el ticker sube: con
+       `top: 84px` el pie del rótulo quedaba a 8px del borde de la ficha y las
+       dos cajas se leían como una sola. */
+    .year-ticker { top: 66px; right: 24px; }
     .yt-year { font-size: clamp(24px, min(8vw, 7vh), 40px); }
-    .yt-device { display: none; }
+    /* Sin espacio lateral no hay dos anclajes: la ficha ocupa el ancho y el
+       relevo se lee en vertical, no de un lado al otro. */
+    .year-panel.side-l,
+    .year-panel.side-r { left: 16px; right: 16px; }
+    /* A ancho completo la ficha pasa por debajo del ticker en toda su anchura,
+       no solo en la columna derecha: el tope tiene que contar con el rótulo
+       entero (66px de margen + 87px de alto) más aire. */
+    .year-panel,
+    .year-panel.side-r { width: auto; bottom: 78px; max-height: calc(100vh - 240px); }
+    /* A 375px de ancho el texto rompe en muchas más líneas que en escritorio y
+       las fichas más largas (2001, 2010) se salían del tope por 36px medidos.
+       En vez de retirar bloques —que es lo que hace la escalera de alturas de
+       más arriba, y aquí no hace falta— se recupera el alto comprimiendo el
+       aire: acolchado, interlineado y separación entre bloques. El cuerpo de
+       letra no se toca; el texto sigue entero y con el mismo tamaño. */
+    .year-panel { padding: 13px 16px; }
+    .yp-year { font-size: 26px; }
+    .yp-device { margin-bottom: 8px; }
+    .yp-strip { padding-bottom: 9px; margin-bottom: 9px; }
+    .yp-desc { line-height: 1.5; margin-bottom: 10px; }
+    .yp-adv  { line-height: 1.5; margin-bottom: 10px; }
+    .yp-dis { gap: 6px; }
+    .yp-dis li { line-height: 1.5; }
     .timeline { left: 24px; right: 24px; }
     .hero-cover { left: 24px; right: 24px; width: auto; bottom: 20%; }
     .cover-standfirst { font-size: 15px; }
+    #grid { padding-left: 24px; padding-right: 24px; }
+    /* Dos columnas de 320px no caben: el desglose pasa debajo de los años. */
+    .modal-cols { grid-template-columns: 1fr; }
 }
 @media (hover: none) {
     .cursor-inner, .cursor-outer { display: none; }
@@ -701,15 +950,26 @@ a:focus-visible, button:focus-visible {
         transition-duration: 0.01ms !important;
         transition-delay: 0ms !important;
     }
-    .slide-title .char, .cover-title .char {
+    .cover-title .char {
         opacity: 1 !important; transform: none !important; filter: none !important;
     }
-    .cover-kicker, .cover-standfirst, .cover-span, .cover-cta,
-    .slide-desc, .slide-era, .slide-tags {
+    .cover-kicker, .cover-standfirst, .cover-span, .cover-cta {
+        opacity: 1 !important; transform: none !important;
+    }
+    /* Las tarjetas y el modal aparecen ya colocados: se conserva la jerarquía,
+       se elimina el desplazamiento y el escalado. */
+    .era-card, .modal-card {
         opacity: 1 !important; transform: none !important;
     }
     .cover-rule { transform: scaleX(1) !important; }
     .nav-link::after { transform: scaleX(1) !important; opacity: 0.4; }
+    /* El relevo de la ficha sigue existiendo (el contenido cambia y cambia de
+       lado), pero sin desplazamiento ni desenfoque: solo el corte de opacidad
+       que `updateYearPanel` ya salta cuando REDUCE_MOTION está activo. */
+    .year-panel.swapping,
+    .year-panel.stowed {
+        transform: none !important; filter: none !important;
+    }
     /* El puntero personalizado depende de un lerp por fotograma: se devuelve el nativo. */
     .cursor-inner, .cursor-outer { display: none; }
     body, * { cursor: auto !important; }
@@ -734,8 +994,8 @@ a:focus-visible, button:focus-visible {
 
 <div class="hero-cover" id="hero-cover">
     <div class="cover-kicker">Industria del entretenimiento y modelos publicitarios</div>
-    <h1 class="cover-title">Veintiséis años <br>comprando <br>atención</h1>
-    <p class="cover-standfirst">Del spot de treinta segundos que interrumpía a un país entero, al modelo generativo que fabrica el anuncio para una sola persona. Cinco eras, cinco aparatos y la publicidad que pagó la fiesta.</p>
+    <h1 class="cover-title">Veintisiete años <br>comprando <br>atención</h1>
+    <p class="cover-standfirst">Del spot de treinta segundos que interrumpía a un país entero, al modelo generativo que fabrica el anuncio para una sola persona. Cinco eras, veintisiete aparatos y la publicidad que pagó la fiesta.</p>
     <div class="cover-span">
         <span class="cover-year">2000</span>
         <span class="cover-rule" aria-hidden="true"></span>
@@ -754,50 +1014,50 @@ a:focus-visible, button:focus-visible {
             <div class="brand-sub">2000 — 2026</div>
         </div>
         <nav class="header-nav">
-            <a href="#slide-1" class="nav-link">Señal</a>
+            <a href="#era-1" class="nav-link">Señal</a>
             <span class="nav-dot"></span>
-            <a href="#slide-2" class="nav-link">Banda</a>
+            <a href="#era-2" class="nav-link">Banda</a>
             <span class="nav-dot"></span>
-            <a href="#slide-3" class="nav-link">Pantalla</a>
+            <a href="#era-3" class="nav-link">Pantalla</a>
             <span class="nav-dot"></span>
-            <a href="#slide-4" class="nav-link">Algoritmo</a>
+            <a href="#era-4" class="nav-link">Algoritmo</a>
             <span class="nav-dot"></span>
-            <a href="#slide-5" class="nav-link">Modelo</a>
+            <a href="#era-5" class="nav-link">Modelo</a>
         </nav>
         <div class="header-actions">
             <a href="#" class="contact-btn" id="restart-btn">Reiniciar <span class="btn-circle"></span></a>
         </div>
     </div>
 
-    <!-- Un único panel para los 27 años. Con una sola caja de texto en
-         pantalla la superposición es imposible por construcción, no por
-         ajuste de márgenes: no hay una segunda caja con la que chocar. -->
-    <div class="year-panel" id="year-panel">
-        <div class="yp-count"><span id="yp-num">01</span> / 27</div>
-        <h2 class="yp-year" id="yp-year">2000</h2>
-        <div class="yp-device" id="yp-device">Televisor de tubo</div>
-        <dl class="yp-rows">
-            <div class="yp-row"><dt>Sector</dt><dd id="yp-sec">Televisión abierta</dd></div>
-            <div class="yp-row"><dt>Modelo publicitario</dt><dd id="yp-ad">Spot de 30 segundos</dd></div>
-            <div class="yp-row"><dt>Era</dt><dd id="yp-eraname">La era del rating</dd></div>
-        </dl>
-    </div>
-
 </div>
 
-<div class="monitor" id="monitor">
-    <div class="monitor-frame">
-        <canvas id="monitor-canvas" width="620" height="620"></canvas>
-        <div class="monitor-scan"></div>
+<!-- Un único panel para los 27 años. Con una sola caja de texto en pantalla la
+     superposición es imposible por construcción, no por ajuste de márgenes:
+     no hay una segunda caja con la que chocar. `aria-live` la anuncia solo 27
+     veces, una por aparato, y no en cada fotograma como haría el ticker. -->
+<div class="year-panel side-l stowed" id="year-panel"
+     role="region" aria-label="Ficha del año" aria-live="polite" aria-atomic="true">
+    <div class="yp-head">
+        <h2 class="yp-year" id="yp-year">2000</h2>
+        <div class="yp-count"><span id="yp-num">01</span> / 27</div>
     </div>
-    <div class="monitor-cap">Reparto de la inversión publicitaria mundial<br>2005 y 2026 publicados · tramos intermedios interpolados</div>
+    <div class="yp-device" id="yp-device">Televisor de tubo</div>
+    <p class="yp-strip">
+        <b id="yp-sec">Televisión abierta</b> · <span id="yp-eraname">La era del rating</span>
+    </p>
+    <p class="yp-desc" id="yp-desc"></p>
+    <p class="yp-h yp-h-v">Ventaja</p>
+    <p class="yp-adv" id="yp-adv"></p>
+    <p class="yp-h">Modelo publicitario</p>
+    <p class="yp-adv"><b id="yp-ad">Spot de 30 segundos.</b> <span id="yp-ads"></span></p>
+    <p class="yp-h">Desventajas</p>
+    <ul class="yp-dis" id="yp-dis"></ul>
 </div>
 
 <div class="year-ticker">
     <div class="yt-label">Año</div>
     <div class="yt-year" id="yt-year">2000</div>
-    <div class="yt-era" id="yt-era">La era del rating</div>
-    <div class="yt-device" id="yt-device">Televisor de tubo</div>
+    <div class="yt-hint">Arrastra para girar el aparato</div>
 </div>
 
 <div class="timeline">
@@ -835,7 +1095,45 @@ a:focus-visible, button:focus-visible {
 </div><!-- /.hero-stage -->
 </section><!-- /#hero -->
 
-<!-- El GRID de las cinco eras se monta aquí en el siguiente bloque. -->
+<!-- =========================================================
+     GRID DE LAS CINCO ERAS
+     El marcado llega vacío a propósito: `buildEraGrid()` escribe las tarjetas
+     leyendo ERAS[], YEARS[] y ERA_BOUNDS. Una sola fuente de verdad, ningún
+     dato duplicado entre el HTML y el JS que pueda quedar desincronizado.
+     ========================================================= -->
+<section id="grid" aria-labelledby="grid-title">
+    <div class="grid-head">
+        <p class="grid-kicker">Las cinco eras</p>
+        <h2 class="grid-title" id="grid-title">Veintisiete años, cinco maneras de comprar atención</h2>
+        <p class="grid-standfirst">
+            Cada tarjeta abre el detalle de su era: los años que la componen, con su
+            aparato y su modelo publicitario, y el reparto de la inversión mundial.
+        </p>
+    </div>
+    <div class="era-grid" id="era-grid"></div>
+</section>
+
+<!-- Un único diálogo reutilizado por las cinco tarjetas: así el foco, el cierre
+     y el `inert` del fondo se resuelven una vez y no cinco. -->
+<div class="era-modal" id="era-modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <button class="modal-close" type="button" data-close aria-label="Cerrar el detalle de la era">&times;</button>
+        <p class="modal-kicker" id="modal-kicker"></p>
+        <h3 class="modal-title" id="modal-title"></h3>
+        <div class="modal-cols">
+            <div>
+                <h4 class="modal-h">Los años</h4>
+                <ol class="modal-years" id="modal-years"></ol>
+            </div>
+            <div>
+                <h4 class="modal-h">Reparto de la inversión</h4>
+                <ul class="modal-spend" id="modal-spend"></ul>
+                <p class="modal-prov" id="modal-prov"></p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -915,6 +1213,240 @@ const CATS = [
 ];
 
 /* =========================================================
+   RELATO POR AÑO
+   Un registro por cada entrada de YEARS[], en el mismo orden y con la misma
+   longitud: `d` contexto, `v` ventaja, `a` cómo se compraba la atención, y
+   `x` las tres desventajas del año, cada una con título y explicación.
+
+   Reglas de redacción, no decorativas:
+   · Solo hechos comprobables y fechados (Napster, la venta de YouTube a
+     Google, Cambridge Analytica, la huelga de 2023). Ninguna cifra inventada:
+     la única serie numérica de la pieza sigue siendo la de ERAS[].spend, con
+     su procedencia declarada.
+   · Cada texto está acotado en longitud porque la ficha tiene un alto máximo
+     medido (`max-height` en .year-panel). Alargar un párrafo aquí desborda
+     el panel en portátiles bajos; si hay que ampliar, hay que medir antes.
+   ========================================================= */
+const STORY = [
+{
+ d: 'El consumo va a hora fija y en familia: la televisión abierta reparte la audiencia de un país entero y el cine sostiene la taquilla. Internet existe, pero como catálogo de texto.',
+ v: 'Una sola emisión alcanzaba a millones de personas a la vez, así que producir para el gran público salía barato por espectador.',
+ a: 'Se compra por rating y GRP, se mide con paneles de audiencia y se completa con prensa, radio y vallas.',
+ x: [['Medición a ciegas', 'La audiencia se estimaba con paneles de unos miles de hogares y se extrapolaba al país entero.'],
+     ['Cero segmentación', 'El mismo anuncio llegaba a quien podía comprar el producto y a quien no, y el anunciante pagaba por ambos.'],
+     ['Entrada cerrada', 'Solo las grandes marcas podían pagar una campaña nacional; el pequeño anunciante quedaba fuera del prime time.']]
+},
+{
+ d: 'El MP3 saca la música del disco y la mete en el bolsillo. Napster ya ha demostrado que un catálogo entero cabe en una red de particulares, y la industria responde con demandas antes que con producto.',
+ v: 'Por primera vez la discoteca personal viaja entera con su dueño y se ordena por gusto, no por el orden que impuso el álbum.',
+ a: 'La marca patrocina el catálogo y el aparato: colocación en videoclips, giras con nombre comercial y acuerdos con sellos.',
+ x: [['Intercambio ilegal masivo', 'Las redes entre particulares repartían discos completos sin licencia y hundieron la venta de soporte físico.'],
+     ['Sin alternativa de pago', 'La industria tardó años en ofrecer una tienda digital legal, y el hueco lo llenó la copia.'],
+     ['Formatos cerrados', 'Cada fabricante empujaba su códec y su tienda, y lo comprado no siempre sonaba en el aparato siguiente.']]
+},
+{
+ d: 'El DVD convierte el salón en sala de cine: imagen limpia, escenas eliminadas, comentarios del director. El alquiler y la venta en disco llegan a pesar más que la taquilla.',
+ v: 'La película deja de ser un pase único y se vuelve un objeto que se guarda, se revisa y se colecciona con material extra.',
+ a: 'El tráiler viaja dentro del disco, sin poder saltarse, y el estudio vende el estreno siguiente a quien compró el anterior.',
+ x: [['Copia doméstica', 'Las grabadoras y la compresión de vídeo permitieron duplicar películas en casa a coste casi nulo.'],
+     ['Bloqueo por regiones', 'El código de zona impedía ver un disco comprado legalmente en otro país.'],
+     ['Publicidad forzada', 'Los avisos iniciales se imponían al espectador que ya había pagado por el disco.']]
+},
+{
+ d: 'La fotografía deja de costar por disparo. La cámara compacta llena discos duros de imágenes que todavía no tienen dónde publicarse, y aparecen los primeros álbumes y foros en línea.',
+ v: 'Cualquiera podía producir y revisar imagen sin pasar por un laboratorio, y equivocarse dejó de costar dinero.',
+ a: 'La revista especializada sigue siendo el canal: se vende el aparato explicando megapíxeles, óptica y prestaciones.',
+ x: [['Sin sitio donde publicar', 'No existían aún plataformas masivas de imagen, así que el material quedaba en el disco duro de su autor.'],
+     ['Calidad irregular', 'Los sensores compactos rendían mal con poca luz y la promesa del megapíxel no se cumplía.'],
+     ['Archivos sin respaldo', 'La foto digital se perdía con el disco duro; la copia de seguridad doméstica casi no existía.']]
+},
+{
+ d: 'El móvil deja de ser solo teléfono: tonos, juegos sencillos, cámara de baja resolución y mensajería. Se forma un mercado de contenido de bolsillo que se paga por mensaje.',
+ v: 'El entretenimiento se vuelve portátil y se compra en microdosis, sin necesidad de ordenador ni tarjeta de crédito.',
+ a: 'El mensaje promocional y la suscripción por SMS: el anunciante llega directo al bolsillo, con permiso o sin él.',
+ x: [['Correo basura por SMS', 'Las suscripciones de tono y horóscopo cobraban cada semana y eran difíciles de cancelar.'],
+     ['Datos carísimos', 'Navegar desde el móvil se facturaba por kilobyte y una descarga podía costar más que el contenido.'],
+     ['Pantallas pobres', 'El contenido se diseñaba para teclas numéricas y pantallas de pocos colores.']]
+},
+{
+ d: 'La consola portátil normaliza jugar fuera de casa y el videojuego alcanza presupuestos de cine. Ese mismo año arranca YouTube y el vídeo en red deja de ser una promesa.',
+ v: 'El juego se hace social y móvil: partidas cortas, juego local entre amigos y catálogos que caben en un cartucho.',
+ a: 'El emplazamiento dentro del juego madura: marcas reales en vallas virtuales, coches con licencia y patrocinio de torneos.',
+ x: [['Piratería de cartucho', 'Los adaptadores de memoria permitían cargar catálogos enteros copiados sin licencia.'],
+     ['Anuncios no eliminables', 'La publicidad integrada en el escenario no se podía quitar del juego ya comprado.'],
+     ['Formatos incompatibles', 'Cada fabricante mantenía su soporte, y el juego comprado no viajaba entre consolas.']]
+},
+{
+ d: 'La consola se conecta a internet de serie y se vuelve el centro del salón: tienda propia, descargas y juego en línea. YouTube se vende a Google y el vídeo de usuarios pasa a ser infraestructura.',
+ v: 'El juego se actualiza, se amplía y se juega con desconocidos en cualquier parte, sin cambiar de disco.',
+ a: 'Publicidad servida dentro del juego y actualizable en remoto, más patrocinio de torneos y contenido descargable de marca.',
+ x: [['Dependencia de la red', 'Sin conexión, buena parte del contenido ya comprado dejaba de funcionar.'],
+     ['Cuentas vulnerables', 'Las tiendas de consola concentraron datos de pago sin la seguridad que eso exigía.'],
+     ['Coste troceado', 'El juego se vendía completo y luego se vendía otra vez a trozos como descarga.']]
+},
+{
+ d: 'El teléfono táctil reordena el sector entero: navegador de verdad, tienda de aplicaciones y pantalla capaz de mostrar vídeo. El ordenador deja de ser el sitio donde ocurre internet.',
+ v: 'El acceso se vuelve permanente y cabe en un solo aparato: música, vídeo, juego y prensa comparten pantalla.',
+ a: 'El banner dentro de la aplicación y la app gratuita financiada con publicidad: se paga por instalación y por impresión.',
+ x: [['Batería y tarifa', 'El vídeo en móvil agotaba la batería y consumía planes de datos que aún se medían en megabytes.'],
+     ['Recogida opaca de datos', 'Las aplicaciones empezaron a leer agenda y ubicación sin explicar para qué.'],
+     ['Ecosistemas cerrados', 'La tienda del fabricante decidía qué se podía instalar y qué comisión pagaba el creador.']]
+},
+{
+ d: 'El vídeo en red se profesionaliza: llegan Hulu, Spotify y las primeras suscripciones legales mientras la crisis financiera recorta presupuestos. El portátil barato lleva la pantalla a cualquier habitación.',
+ v: 'Ver y escuchar bajo demanda deja de ser cosa de expertos: el catálogo legal por fin compite en comodidad con la copia.',
+ a: 'El anuncio previo al vídeo se impone como formato, medido por reproducción y no por audiencia estimada.',
+ x: [['Catálogo por país', 'Los derechos por territorio dejaban fuera al espectador que pagaba desde el país equivocado.'],
+     ['Espera obligatoria', 'El anuncio previo obligaba a esperar para consumir un contenido de pocos segundos.'],
+     ['Máquinas justas', 'Los ultraportátiles baratos no movían vídeo de alta definición con soltura.']]
+},
+{
+ d: 'La suscripción sin anuncios se consolida: Netflix pasa del disco por correo al catálogo en red y el descodificador conecta el televisor viejo a internet. El público empieza a pagar por no ver publicidad.',
+ v: 'Ver una serie entera cuando se quiere, sin parrilla y sin cortes, cambia la forma de escribir y de consumir ficción.',
+ a: 'Conviven la suscripción limpia y el modelo mixto: la marca que quiere estar dentro financia el contenido en vez de interrumpirlo.',
+ x: [['Catálogo repartido', 'Cada estudio empezó a montar su propia plataforma y el catálogo se fragmentó en suscripciones.'],
+     ['Ancho de banda corto', 'La alta definición exigía conexiones que muchos hogares todavía no tenían.'],
+     ['Consumo vigilado', 'El servicio sabía qué, cuándo y cuánto veía cada hogar, sin contrapartida clara para el espectador.']]
+},
+{
+ d: 'La industria cambia de verdad con el empuje de internet: música, cine, televisión y videojuego se mudan a plataformas digitales, y las redes sociales pasan a ser el sitio donde se promociona y se comparte.',
+ v: 'Mayor acceso a mucho más contenido, más rápido y desde varios aparatos, y contacto directo entre los artistas y su público.',
+ a: 'La televisión tradicional convive con las primeras campañas virales: producto integrado en la ficción, contenido propio de marca y redes emergentes.',
+ x: [['Piratería descontrolada', 'Las redes de intercambio ilegal y la descarga sin licencia afectaron los ingresos de películas, videojuegos y música.'],
+     ['Vulnerabilidades de red', 'Los sistemas en línea sufrían fallas de seguridad y ataques constantes que exponían datos de usuarios.'],
+     ['Conectividad limitada', 'La banda ancha aún no era universal, lo que restringía el consumo fluido de contenido digital avanzado.']]
+},
+{
+ d: 'El televisor se conecta solo y trae aplicaciones dentro. La sobremesa se parte: se ve la serie en la pantalla grande mientras se comenta en el móvil, y la audiencia deja de ser un bloque.',
+ v: 'El televisor recupera protagonismo sin exigir aparato aparte, y el catálogo bajo demanda entra en el salón por defecto.',
+ a: 'Anuncio interactivo y segunda pantalla: la marca pide una acción, no solo atención, y mide la respuesta desde el sofá.',
+ x: [['Interfaces lentas', 'Las aplicaciones del televisor eran torpes y quedaban sin actualizar a los pocos años.'],
+     ['Televisores que miran', 'Los primeros sistemas de reconocimiento de contenido recogían hábitos de visionado sin aviso claro.'],
+     ['Atención partida', 'La segunda pantalla restó atención a la obra y empujó a producir contenido más redundante.']]
+},
+{
+ d: 'Aparece un oficio nuevo: vivir de publicar. El reparto de ingresos de YouTube convierte el vídeo aficionado en carrera, y la cámara de acción da imagen espectacular a coste bajo.',
+ v: 'Cualquiera con una cámara y constancia podía construir una audiencia sin pasar por un canal ni por un estudio.',
+ a: 'Reparto de ingresos publicitarios y patrocinio directo del creador: la marca compra confianza prestada, no espacio.',
+ x: [['Ingreso inestable', 'El creador dependía de un algoritmo y de tarifas publicitarias que cambiaban sin aviso.'],
+     ['Publicidad no declarada', 'El patrocinio se mezclaba con la opinión sin que el público pudiera distinguirlos.'],
+     ['Copia sin crédito', 'El vídeo se reeditaba y se volvía a subir sin permiso, y la detección automática era lenta.']]
+},
+{
+ d: 'El adaptador de bajo coste convierte cualquier televisor en televisor conectado y el streaming se vuelve mayoritario. Netflix estrena su primera serie propia y demuestra que la plataforma también produce.',
+ v: 'Actualizar el televisor deja de costar un televisor: por poco dinero, cualquier pantalla accede a todo el catálogo.',
+ a: 'Entra la segmentación por perfil: se compra al espectador, definido por lo que ha visto, y no la franja horaria.',
+ x: [['Perfilado permanente', 'Recomendar exige vigilar, y el historial de visionado se convirtió en el producto.'],
+     ['Burbuja de catálogo', 'Lo visible se estrechó a lo que el sistema creía que iba a gustar.'],
+     ['Obsolescencia rápida', 'Los adaptadores baratos dejaban de recibir actualizaciones en dos o tres años.']]
+},
+{
+ d: 'El audio vuelve: los altavoces con asistente entran en la cocina y el salón, y el pódcast empieza a profesionalizarse. Escuchar deja de exigir pantalla y compite por los ratos muertos del día.',
+ v: 'El entretenimiento se cuela en momentos que antes estaban vacíos, sin ocupar las manos ni la vista.',
+ a: 'Audio programático: la cuña se compra en subasta y se inserta en el momento de la escucha, distinta para cada oyente.',
+ x: [['Micrófono despierto', 'El aparato escucha esperando su palabra clave, y los fragmentos capturados salían del hogar.'],
+     ['Anuncio sin salida', 'En audio no hay botón de saltar: la cuña ocupa el único canal disponible.'],
+     ['Medición pobre', 'Nadie sabía con certeza si el oyente estaba delante del altavoz o en otra habitación.']]
+},
+{
+ d: 'La pantalla llega a la muñeca y el cuerpo se vuelve fuente de datos. El entretenimiento se corta en piezas de segundos, pensadas para mirarse de reojo entre una cosa y otra.',
+ v: 'Avisos y contenido justo cuando importan, sin sacar el teléfono, y una lectura del propio hábito que antes no existía.',
+ a: 'La notificación patrocinada: un mensaje breve, personal y pegado al cuerpo, con una tasa de apertura altísima.',
+ x: [['Interrupción constante', 'El aviso en la muñeca no se ignora como el del bolsillo, y la fatiga apareció pronto.'],
+     ['Datos de salud sueltos', 'Ritmo cardíaco y sueño se guardaron en servidores privados con reglas poco claras.'],
+     ['Pantalla insuficiente', 'El formato obligaba a reducir la información hasta volverla ambigua.']]
+},
+{
+ d: 'La realidad virtual llega al consumidor con visores de gran marca y un catálogo corto. El vídeo en directo se generaliza en redes y el móvil pasa a ser cámara de emisión.',
+ v: 'La obra deja de mirarse y empieza a habitarse: el espectador entra en la escena y decide dónde mira.',
+ a: 'La experiencia de marca sustituye al anuncio: la marca no interrumpe, construye el espacio donde ocurre el contenido.',
+ x: [['Precio y mareo', 'El equipo costaba lo que una consola y una parte del público no aguantaba más de unos minutos.'],
+     ['Catálogo escaso', 'Sin público no había producción, y sin producción no llegaba el público.'],
+     ['Aislamiento', 'El visor sacaba al usuario de la habitación y rompía el consumo compartido.']]
+},
+{
+ d: 'El salón se reordena alrededor del sonido: la barra sustituye al equipo de cinco altavoces y el audio envolvente se vuelve accesible. Las plataformas ya producen más ficción que las cadenas.',
+ v: 'Un cable y un aparato bastaban para que la película sonara como en sala, sin obra ni instalación.',
+ a: 'La marca sonora: sintonías, firmas de audio y patrocinio de pódcast, donde la voz del anfitrión vale más que la cuña.',
+ x: [['Formatos incompatibles', 'Cada sello de audio envolvente exigía su licencia y no todo el catálogo la traía.'],
+     ['Guerra de plataformas', 'La ficción se repartió entre servicios y el espectador acabó pagando varias cuotas.'],
+     ['Envolvente falso', 'Muchos equipos vendían como envolvente lo que era una simulación por procesado.']]
+},
+{
+ d: 'La pantalla se come el aparato y el vídeo se gira: el formato vertical se impone porque es como se sostiene el teléfono. Los escándalos de datos ponen la publicidad dirigida bajo foco político.',
+ v: 'El vídeo se adapta por fin a la mano que lo sostiene, y producir para él no exige equipo profesional.',
+ a: 'La historia patrocinada: contenido a pantalla completa, efímero, indistinguible en forma del que publica un amigo.',
+ x: [['Uso indebido de datos', 'El caso Cambridge Analytica dejó claro que el perfilado publicitario podía usarse para otras cosas.'],
+     ['Contenido sin registro', 'Lo que desaparece en un día es difícil de auditar y de reclamar.'],
+     ['Diseño para enganchar', 'El desplazamiento infinito se optimizó para el tiempo de uso, no para el interés del usuario.']]
+},
+{
+ d: 'Los auriculares sin cable normalizan escuchar todo el día y el pódcast se vuelve mercado: fichajes millonarios y exclusivas de plataforma. El audio hablado deja de ser un nicho.',
+ v: 'El catálogo hablado es barato de producir, íntimo de escuchar y acompaña tareas que no admiten pantalla.',
+ a: 'La mención del anfitrión: la voz de confianza lee el anuncio y la marca hereda la relación que el oyente ya tenía.',
+ x: [['Exclusivas de plataforma', 'El pódcast, que nació abierto, empezó a encerrarse tras suscripciones.'],
+     ['Medición difusa', 'La descarga no prueba escucha, y el sector acordó métricas discutibles.'],
+     ['Residuo electrónico', 'Los auriculares con batería sellada se tiran enteros cuando la celda muere.']]
+},
+{
+ d: 'El confinamiento vuelca al mundo sobre la pantalla: récords de juego, de streaming y de videollamada. Los estrenos de cine se van a las plataformas y la sala pierde la exclusiva.',
+ v: 'El entretenimiento en casa sostuvo la vida social cuando no había otra, y el estreno llegó a quien no podía salir.',
+ a: 'El evento en directo dentro del juego: conciertos y estrenos celebrados en el escenario virtual, patrocinados de principio a fin.',
+ x: [['Escasez de aparatos', 'La crisis de semiconductores dejó la consola sin existencias durante más de un año.'],
+     ['Fatiga de pantalla', 'El mismo aparato servía para trabajar, estudiar y descansar, y el descanso perdió.'],
+     ['Reventa automatizada', 'Los programas de compra masiva acapararon el lanzamiento y dispararon el precio de reventa.']]
+},
+{
+ d: 'El vídeo corto se convierte en el formato dominante y su recomendación deja de depender de a quién sigues. El plegable ensaya una pantalla que cambia de tamaño según lo que se está viendo.',
+ v: 'Descubrir contenido nuevo dejó de exigir una red de contactos: bastaba con mirar y el sistema aprendía.',
+ a: 'La subasta programática se afina: cada impresión se compra en milisegundos según el perfil de quien va a verla.',
+ x: [['Recomendación opaca', 'Ni el propio creador sabía por qué un vídeo llegaba a millones y el siguiente a nadie.'],
+     ['Uso compulsivo', 'El formato corto e infinito se diseñó para que parar costara esfuerzo.'],
+     ['Música sin licencia clara', 'El audio ajeno se usaba masivamente y el reparto al autor llegaba tarde o no llegaba.']]
+},
+{
+ d: 'El directo se vuelve comercio: se emite, se enseña producto y se vende en la misma pantalla. La publicidad afronta el fin del rastreo entre sitios y sale a buscar dato propio.',
+ v: 'El vínculo con el público se hizo inmediato y bidireccional, y monetizarlo dejó de depender solo de la publicidad.',
+ a: 'El comercio en directo: la compra ocurre dentro del contenido, sin intermediario ni salto a otra página.',
+ x: [['Precariedad del emisor', 'Vivir del directo exige horarios extremos y no deja ingreso en cuanto se para.'],
+     ['Moderación insuficiente', 'El directo no se puede revisar antes de publicarse y el acoso encontró hueco.'],
+     ['Fin de la cookie', 'El fin del rastreo entre sitios dejó a muchos anunciantes sin la medición sobre la que habían montado su gasto.']]
+},
+{
+ d: 'La IA generativa entra en la producción de entretenimiento y provoca la huelga de guionistas y actores en Hollywood. El visor de realidad mixta mezcla escena real y capa digital en el mismo campo de visión.',
+ v: 'Producir imagen, voz y música deja de exigir equipo ni presupuesto, y el ordenador espacial libera la pantalla del mueble.',
+ a: 'El anuncio volumétrico: la marca ocupa espacio en la habitación del usuario, no un rectángulo dentro de la pantalla.',
+ x: [['Trabajo creativo amenazado', 'La huelga de 2023 se peleó exactamente sobre quién decide cuándo entra un modelo en la producción.'],
+     ['Obra sin consentimiento', 'Los modelos se entrenaron con catálogos protegidos sin permiso ni pago a sus autores.'],
+     ['Precio prohibitivo', 'El visor de gama alta costaba lo que un ordenador profesional y no encontró público masivo.']]
+},
+{
+ d: 'El asistente sale de la pantalla y se pone en la cara: gafas ligeras con cámara, voz y recomendación en tiempo real. La IA generativa pasa de curiosidad a herramienta cotidiana de producción.',
+ v: 'La recomendación llega en el momento y el lugar donde sirve, sin sacar aparato ni interrumpir lo que se está haciendo.',
+ a: 'La recomendación generada: el modelo redacta la sugerencia y el anunciante paga por aparecer en ella, no por un espacio fijo.',
+ x: [['Grabación sin permiso', 'La cámara en la cara graba también a quien no ha aceptado nada.'],
+     ['Anuncio no auditable', 'Cuando la sugerencia la redacta un modelo, distinguir consejo de publicidad se vuelve casi imposible.'],
+     ['Contenido sintético masivo', 'La producción automática inundó los catálogos y hundió la visibilidad del trabajo humano.']]
+},
+{
+ d: 'Aparecen aparatos que renuncian a la pantalla y funcionan por voz y por contexto. El comercio empieza a delegarse en el asistente, que compara, elige y compra en nombre del usuario.',
+ v: 'Resolver una tarea deja de exigir navegar: se pide en voz alta y el sistema recorre las opciones por ti.',
+ a: 'El medio pasa a ser el comercio: la marca no compra atención, compra posición dentro de la recomendación del asistente.',
+ x: [['Intermediario único', 'Si el asistente elige, la marca que no esté en su índice desaparece del mercado.'],
+     ['Sin rastro visible', 'Sin pantalla no queda registro de qué se ofreció ni de por qué se descartó el resto.'],
+     ['Dependencia de la nube', 'El aparato sin conexión no hace nada: la función vive entera en un servidor ajeno.']]
+},
+{
+ d: 'La pantalla se disuelve en el entorno y el anuncio se fabrica al vuelo para quien lo mira. El gasto publicitario es ya mayoritariamente digital y el contenido sintético convive con el humano en el mismo catálogo.',
+ v: 'La obra se ajusta al momento, al idioma y al aparato de cada persona sin producir una versión distinta para cada una.',
+ a: 'Creatividad sintética: el anuncio se genera por usuario a partir de dato propio, y el comercio se queda la parte que antes iba al medio.',
+ x: [['Publicidad indistinguible', 'Cuando el anuncio se fabrica para una sola persona, nadie externo puede auditar qué se le dijo.'],
+     ['Concentración del dato', 'El dato propio favorece a quien ya tiene la relación con el cliente y cierra la puerta al resto.'],
+     ['Saturación ambiental', 'Si toda superficie puede mostrar contenido, no queda espacio libre de mensaje comercial.']]
+}
+];
+
+/* =========================================================
    ESTADO GLOBAL
    ========================================================= */
 const canvas = document.querySelector('#webgl');
@@ -945,7 +1477,10 @@ let rimLight, accentLight;
 const colA = new THREE.Color();
 const colB = new THREE.Color();
 
-const sizes = { width: window.innerWidth, height: window.innerHeight };
+/* El `|| 1` no es cosmético: si el módulo se evalúa sin viewport (panel oculto,
+   pestaña restaurada en segundo plano) el aspecto sería 0/0 = NaN y la matriz de
+   proyección quedaría envenenada desde la construcción de la cámara. */
+const sizes = { width: window.innerWidth || 1, height: window.innerHeight || 1 };
 
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const lerp = (a, b, t) => a + (b - a) * t;
@@ -956,7 +1491,7 @@ const smoothstep = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
    Regla: nunca hay dos electrónicos en pantalla a la vez. El saliente
    se retira por completo y solo entonces emerge el siguiente.
 
-   Los puntos de relevo caen en los huecos entre slides, no en sus centros,
+   Los puntos de relevo caen en los huecos entre eras, no en sus centros,
    para que el aparato nunca se desvanezca mientras se lee el texto de su
    era. Cada `at` es el punto medio del hueco correspondiente y `span` la
    mitad de la ventana de cambio (medida en progreso de hero).
@@ -1058,11 +1593,29 @@ function cyl(rt, rb, h, seg, mat) {
     return m;
 }
 
+/* `envMapIntensity` gradúa cuánto entorno recoge cada material. Sin él, añadir
+   el estudio subía por igual carcasas y metales y se perdía el contraste entre
+   los dos. Las carcasas piden poco; los metales viven de ello. */
 function matShell(c) {
-    return new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: 0.55, metalness: 0.35, transparent: true, opacity: 1 });
+    return new THREE.MeshStandardMaterial({
+        color: new THREE.Color(c),
+        roughness: 0.42, metalness: 0.35,
+        envMapIntensity: 0.85,
+        transparent: true, opacity: 1
+    });
 }
+/* Los cromados y molduras son el material que más cambia con el entorno: en PBR
+   un metal no tiene componente difusa, así que su color ES el reflejo. El
+   `clearcoat` añade la segunda capa especular del lacado —el brillo que se
+   desplaza sobre el reflejo— y es lo que separa un bronce de un plástico gris. */
 function matTrim(c) {
-    return new THREE.MeshStandardMaterial({ color: new THREE.Color(c), roughness: 0.32, metalness: 0.88, transparent: true, opacity: 1 });
+    return new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color(c),
+        roughness: 0.22, metalness: 0.95,
+        envMapIntensity: 1.5,
+        clearcoat: 0.6, clearcoatRoughness: 0.18,
+        transparent: true, opacity: 1
+    });
 }
 function matGlass(glow, intensity) {
     return new THREE.MeshStandardMaterial({
@@ -1077,7 +1630,9 @@ function matGlass(glow, intensity) {
 }
 
 /* =========================================================
-   LOS CINCO APARATOS
+   LOS DOCE ARQUETIPOS
+   Cada uno cubre varios años: la tabla BUILDERS los reparte. Todos leen el
+   mismo registro de año (`sh`, `tr`, `gl` y los parámetros `p`).
    ========================================================= */
 function buildCRT(e) {
     const g = new THREE.Group();
@@ -1142,131 +1697,6 @@ function buildCRT(e) {
         foot.position.set(s * 0.85, -1.1, 0.2);
         g.add(foot);
     }
-    return g;
-}
-
-function buildMP3(e) {
-    const g = new THREE.Group();
-    const shell = matShell(e.shell);
-    const trim = matTrim(e.trim);
-    const glass = matGlass(e.glow, 1.3);
-
-    const body = slab(1.35, 2.25, 0.24, 0.16, shell);
-    g.add(body);
-
-    const bezel = slab(1.12, 0.86, 0.06, 0.05, trim);
-    bezel.position.set(0, 0.52, 0.12);
-    g.add(bezel);
-    const screen = slab(1.02, 0.76, 0.05, 0.04, glass);
-    screen.position.set(0, 0.52, 0.15);
-    g.add(screen);
-
-    // rueda de control
-    const wheel = new THREE.Mesh(new THREE.TorusGeometry(0.4, 0.12, 18, 56), trim);
-    wheel.position.set(0, -0.52, 0.1);
-    wheel.castShadow = true;
-    g.add(wheel);
-    const center = cyl(0.17, 0.17, 0.07, 28, matGlass(e.accent, 1.6));
-    center.rotation.x = Math.PI / 2;
-    center.position.set(0, -0.52, 0.13);
-    g.add(center);
-
-    // jack y ranura
-    const jack = cyl(0.07, 0.07, 0.12, 16, trim);
-    jack.position.set(-0.4, 1.14, 0);
-    g.add(jack);
-    const hold = box(0.26, 0.06, 0.06, trim);
-    hold.position.set(0.42, 1.14, 0);
-    g.add(hold);
-
-    // trasera metálica
-    const backPlate = slab(1.24, 2.14, 0.05, 0.14, trim);
-    backPlate.position.z = -0.13;
-    g.add(backPlate);
-    return g;
-}
-
-function buildPhone(e) {
-    const g = new THREE.Group();
-    const shell = matShell(e.shell);
-    const trim = matTrim(e.trim);
-    const glass = matGlass(e.glow, 1.25);
-
-    const body = slab(1.32, 2.62, 0.18, 0.22, shell);
-    g.add(body);
-
-    const screen = slab(1.18, 2.34, 0.04, 0.18, glass);
-    screen.position.z = 0.1;
-    g.add(screen);
-
-    // marco metálico
-    const frame = slab(1.36, 2.66, 0.1, 0.23, trim);
-    frame.position.z = -0.02;
-    g.add(frame);
-
-    // muesca superior y altavoz
-    const speaker = box(0.34, 0.05, 0.04, trim);
-    speaker.position.set(0, 1.14, 0.13);
-    g.add(speaker);
-
-    // botones laterales
-    for (let i = 0; i < 2; i++) {
-        const btn = box(0.06, 0.3, 0.1, trim);
-        btn.position.set(-0.7, 0.78 - i * 0.42, 0);
-        g.add(btn);
-    }
-    const power = box(0.06, 0.36, 0.1, trim);
-    power.position.set(0.7, 0.66, 0);
-    g.add(power);
-
-    // cámaras traseras
-    for (let i = 0; i < 2; i++) {
-        const cam = cyl(0.12, 0.12, 0.06, 20, trim);
-        cam.rotation.x = Math.PI / 2;
-        cam.position.set(-0.42, 0.98 - i * 0.3, -0.12);
-        g.add(cam);
-        const lens = cyl(0.06, 0.06, 0.04, 16, matGlass(e.accent, 1.8));
-        lens.rotation.x = Math.PI / 2;
-        lens.position.set(-0.42, 0.98 - i * 0.3, -0.15);
-        g.add(lens);
-    }
-    return g;
-}
-
-function buildTV(e) {
-    const g = new THREE.Group();
-    const shell = matShell(e.shell);
-    const trim = matTrim(e.trim);
-    const glass = matGlass(e.glow, 1.15);
-
-    const panel = slab(3.7, 2.16, 0.14, 0.06, shell);
-    g.add(panel);
-
-    const screen = slab(3.56, 2.02, 0.04, 0.04, glass);
-    screen.position.z = 0.1;
-    g.add(screen);
-
-    // franja inferior y logotipo
-    const chin = box(3.6, 0.05, 0.05, trim);
-    chin.position.set(0, -1.02, 0.1);
-    g.add(chin);
-    const led = new THREE.Mesh(new THREE.SphereGeometry(0.035, 12, 12), matGlass(e.accent, 3.0));
-    led.position.set(0, -1.08, 0.12);
-    g.add(led);
-
-    // soporte
-    const neck = box(0.34, 0.62, 0.22, trim);
-    neck.position.set(0, -1.4, -0.05);
-    g.add(neck);
-    const base = slab(1.7, 0.75, 0.09, 0.2, trim);
-    base.rotation.x = -Math.PI / 2;
-    base.position.set(0, -1.72, -0.05);
-    g.add(base);
-
-    // barra de sonido
-    const bar = slab(2.4, 0.26, 0.24, 0.1, shell);
-    bar.position.set(0, -1.62, 0.55);
-    g.add(bar);
     return g;
 }
 
@@ -1749,6 +2179,49 @@ function createBackgroundShader() {
 }
 
 /* =========================================================
+   ESTUDIO PARA REFLEJOS
+   Una sala virtual con paneles emisivos que nunca se dibuja en pantalla: solo
+   se cuece una vez con PMREMGenerator para obtener el mapa de entorno.
+
+   Se construye a mano en lugar de importar `RoomEnvironment` de los addons de
+   three: son treinta líneas, evita una segunda descarga desde unpkg y, sobre
+   todo, deja afinar el ambiente de esta pieza en concreto —cenital neutra,
+   clave cálida como el fósforo ámbar del principio, contra fría como el índigo
+   del final— en vez de heredar el salón blanco genérico del ejemplo.
+   ========================================================= */
+function buildStudioEnvironment() {
+    const s = new THREE.Scene();
+
+    // Caja envolvente: el "no reflejo", el negro del escenario.
+    s.add(new THREE.Mesh(
+        new THREE.BoxGeometry(24, 24, 24),
+        new THREE.MeshBasicMaterial({ color: 0x0a0a0e, side: THREE.BackSide })
+    ));
+
+    /* Los valores por encima de 1 no se recortan: PMREM trabaja en coma
+       flotante, así que estos paneles son fuentes de rango alto de verdad. */
+    const panel = (hex, mult, w, h, pos, rot) => {
+        const m = new THREE.Mesh(
+            new THREE.PlaneGeometry(w, h),
+            new THREE.MeshBasicMaterial({
+                color: new THREE.Color(hex).multiplyScalar(mult),
+                side: THREE.DoubleSide
+            })
+        );
+        m.position.set(pos[0], pos[1], pos[2]);
+        m.rotation.set(rot[0], rot[1], 0);
+        s.add(m);
+    };
+
+    panel('#ffffff', 3.0, 13, 13, [0, 8, 0], [-Math.PI / 2, 0]);        // cenital difusa
+    panel('#ffd7a3', 5.2, 7, 10, [6.5, 1, 4], [0, -Math.PI / 4]);       // clave cálida
+    panel('#9fd8ff', 2.8, 7, 10, [-6.5, 2, -4], [0, Math.PI / 4]);      // contra fría
+    panel('#ffb14a', 1.5, 10, 6, [0, -4.5, 3], [Math.PI / 2.5, 0]);     // rebote de suelo
+
+    return s;
+}
+
+/* =========================================================
    ESCENA
    ========================================================= */
 function initScene() {
@@ -1778,7 +2251,23 @@ function initScene() {
     // mancha plana). 1.35 recupera el modelado y los reflejos metálicos.
     renderer.toneMappingExposure = 1.35;
 
-    const ambientLight = new THREE.AmbientLight('#ffffff', 0.18);
+    /* ILUMINACIÓN POR IMAGEN (IBL)
+       Esta es la diferencia entre "modelo pobre" y "modelo caro", y no tiene
+       que ver con la geometría. En PBR un material metálico no tiene componente
+       difusa: todo su color es reflejo del entorno. Hasta aquí la escena no
+       tenía `scene.environment`, así que los metales (metalness 0.88) solo
+       podían devolver los cuatro brillos especulares de las luces analíticas y
+       se leían planos, oscuros y de plástico.
+       Con un entorno que reflejar, el mismo aparato adquiere el degradado
+       continuo sobre el volumen que hace que un bronce parezca bronce. */
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    const envTarget = pmrem.fromScene(buildStudioEnvironment(), 0.035);
+    scene.environment = envTarget.texture;
+    pmrem.dispose();   // el render target sobrevive; el generador ya no hace falta
+
+    // El entorno aporta ya la luz de relleno omnidireccional que antes ponía la
+    // ambiental. Mantener 0.18 encima lavaba los negros y anulaba el modelado.
+    const ambientLight = new THREE.AmbientLight('#ffffff', 0.05);
     scene.add(ambientLight);
 
     const keyLight = new THREE.SpotLight('#ffffff', 11.0);
@@ -1809,22 +2298,30 @@ function initScene() {
     createSparks();
 }
 
-function onWindowResize() {
-    sizes.width = window.innerWidth;
-    sizes.height = window.innerHeight;
-    camera.aspect = sizes.width / sizes.height;
+/* El lienzo se dimensiona contra el viewport, pero el evento `resize` no es un
+   disparador fiable: si la página arranca sin viewport, el evento nunca llega y
+   el canvas se queda en 0×0 para siempre —el motivo real de que esta pieza no
+   se pudiera ver nunca en un panel oculto—. Se ignora el tamaño degenerado en
+   vez de propagarlo, y se observa la caja además de escuchar el evento. */
+function applyViewport() {
+    const w = window.innerWidth, h = window.innerHeight;
+    if (!w || !h) return false;   // todavía sin viewport: mejor no tocar nada
+    sizes.width = w;
+    sizes.height = h;
+    camera.aspect = w / h;
     camera.updateProjectionMatrix();
-    renderer.setSize(sizes.width, sizes.height);
+    renderer.setSize(w, h);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    if (shaderUniforms) shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
+    if (shaderUniforms) shaderUniforms.uResolution.value.set(w, h);
     measureLayout();
+    return true;
 }
 
 /* =========================================================
    TEXTO: LETRA A LETRA
    ========================================================= */
 function splitTitlesIntoChars() {
-    const titles = document.querySelectorAll('.slide-title, .cover-title');
+    const titles = document.querySelectorAll('.cover-title');
     titles.forEach(title => {
         const text = title.innerHTML;
         // Sin esto, un lector de pantalla deletrea el título letra por letra:
@@ -1852,82 +2349,11 @@ function splitTitlesIntoChars() {
 }
 
 /* =========================================================
-   PANEL DE INVERSIÓN PUBLICITARIA
-   ========================================================= */
-const monitorCanvas = document.getElementById('monitor-canvas');
-const monitorCtx = monitorCanvas.getContext('2d');
-let monitorFrame = 0;
-
-function drawMonitor(f) {
-    const W = monitorCanvas.width, H = monitorCanvas.height;
-    const ctx = monitorCtx;
-    const ff = clamp(f, 0, ERA_COUNT - 1);
-    const i0 = Math.floor(ff), i1 = Math.min(ERA_COUNT - 1, i0 + 1), t = ff - i0;
-
-    ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = 'rgba(5, 5, 8, 0.72)';
-    ctx.fillRect(0, 0, W, H);
-
-    ctx.textAlign = 'left';
-    ctx.fillStyle = 'rgba(255,255,255,0.85)';
-    ctx.font = '500 22px Outfit, sans-serif';
-    ctx.fillText('Inversión publicitaria', 34, 56);
-
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = '400 16px "IBM Plex Mono", monospace';
-    ctx.fillText(ERAS[t > 0.5 ? i1 : i0].years, 34, 84);
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.14)';
-    ctx.beginPath(); ctx.moveTo(34, 100); ctx.lineTo(W - 34, 100); ctx.stroke();
-
-    const padL = 34, padR = 34;
-    const barMax = W - padL - padR;
-    const top = 148, rowH = 74;
-
-    CATS.forEach((cat, k) => {
-        const v = lerp(ERAS[i0].spend[k], ERAS[i1].spend[k], t);
-        const y = top + k * rowH;
-
-        ctx.textAlign = 'left';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.font = '400 17px Outfit, sans-serif';
-        ctx.fillText(cat.name, padL, y);
-
-        ctx.textAlign = 'right';
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.font = '400 17px "IBM Plex Mono", monospace';
-        ctx.fillText(v.toFixed(0) + '%', W - padR, y);
-
-        ctx.fillStyle = 'rgba(255,255,255,0.07)';
-        ctx.fillRect(padL, y + 14, barMax, 9);
-
-        ctx.save();
-        ctx.shadowColor = cat.color;
-        ctx.shadowBlur = 16;
-        ctx.fillStyle = cat.color;
-        ctx.fillRect(padL, y + 14, Math.max(1, barMax * (v / 45)), 9);
-        ctx.restore();
-    });
-
-    // Se declara en pantalla la procedencia del dato: los extremos de la serie
-    // están publicados, los tramos intermedios son interpolación entre ellos.
-    const era = ERAS[t > 0.5 ? i1 : i0];
-    ctx.textAlign = 'left';
-    ctx.fillStyle = era.sourced ? 'rgba(150,240,200,0.55)' : 'rgba(255,255,255,0.28)';
-    ctx.font = '400 13px "IBM Plex Mono", monospace';
-    ctx.fillText(era.sourced ? '% mundial · dato publicado'
-                             : '% mundial · interpolado', padL, H - 30);
-}
-
-/* =========================================================
    INTERFAZ SOBRE LIENZO
    ========================================================= */
 const elYear = document.getElementById('yt-year');
-const elEra = document.getElementById('yt-era');
-const elDevice = document.getElementById('yt-device');
 const elFill = document.getElementById('timeline-fill');
 const elMarker = document.getElementById('timeline-marker');
-const elMonitor = document.getElementById('monitor');
 const labelSpans = document.querySelectorAll('#timeline-labels span');
 const navLinks = document.querySelectorAll('.nav-link');
 
@@ -1974,6 +2400,10 @@ const ypDevice = document.getElementById('yp-device');
 const ypSec = document.getElementById('yp-sec');
 const ypAd = document.getElementById('yp-ad');
 const ypEraName = document.getElementById('yp-eraname');
+const ypDesc = document.getElementById('yp-desc');
+const ypAdv = document.getElementById('yp-adv');
+const ypAds = document.getElementById('yp-ads');
+const ypDis = document.getElementById('yp-dis');
 
 /** Progreso 0..1 dentro del hero, medido contra la propia sección.
  *  Independiente de lo que venga debajo (grid, modal), así que añadir
@@ -2007,6 +2437,14 @@ function updateHeroChrome(p) {
     // misma velocidad a la que ella se va, sin solaparse.
     for (const el of hudEls) if (el) el.style.opacity = String(out);
 
+    // La ficha no se cruza con la portada: espera a que haya terminado de
+    // salir y entra entonces con su propia transición. `toggle` con segundo
+    // argumento no toca el DOM si el estado no cambia, así que llamarlo cada
+    // fotograma no cuesta nada.
+    const stowed = out < 1;
+    yearPanel.classList.toggle('stowed', stowed);
+    yearPanel.setAttribute('aria-hidden', stowed ? 'true' : 'false');
+
     // Últimos 4.5%: el escenario se apaga y deja el sitio al grid.
     const exit = hasContentBelow
         ? clamp((p - HERO.STAGE_FADE_START) / (1 - HERO.STAGE_FADE_START), 0, 1)
@@ -2024,33 +2462,76 @@ let swapTimer = null;
 function updateYearPanel(s) {
     const idx = yearIndex(s);
     if (idx === lastYearIdx) return;
+    const firstWrite = lastYearIdx < 0;   // el primer pintado no releva nada
     lastYearIdx = idx;
     const d = YEARS[idx];
     const e = eraIndexOfYear(idx);
+    const st = STORY[idx];
+
+    // Lado alterno: pares a la izquierda, impares a la derecha. Que la ficha
+    // salte de lado es la señal de que ha cambiado de aparato; con el texto
+    // siempre en la misma esquina, veintisiete relevos pasan de largo.
+    const toRight = (idx % 2) === 1;
 
     const write = () => {
         ypNum.textContent = String(idx + 1).padStart(2, '0');
         ypYear.textContent = d.y;
         ypDevice.textContent = d.dev;
         ypSec.textContent = d.sec;
-        ypAd.textContent = d.ad;
         ypEraName.textContent = ERAS[e].era;
+        ypAd.textContent = d.ad + '.';
+        ypDesc.textContent = st.d;
+        ypAdv.textContent = st.v;
+        ypAds.textContent = st.a;
+
+        // Se reconstruye la lista en vez de reescribir nodos existentes:
+        // son tres elementos, y así no hay estado que quede desincronizado.
+        ypDis.textContent = '';
+        st.x.forEach(([titulo, texto]) => {
+            const li = document.createElement('li');
+            const b = document.createElement('b');
+            b.textContent = titulo + ':';
+            // La explicación va en su propio elemento, no en un nodo de texto
+            // suelto: es lo que permite retirarla por CSS en pantallas muy
+            // bajas dejando el titular en pie.
+            const s = document.createElement('span');
+            s.className = 'yp-dt';
+            s.textContent = ' ' + texto;
+            li.appendChild(b);
+            li.appendChild(s);
+            ypDis.appendChild(li);
+        });
+
+        // El color de la barra lateral migra con la era, no con el año.
+        yearPanel.style.setProperty('--era-glow', ERAS[e].glow);
+
         elYear.textContent = d.y;
-        elDevice.textContent = d.dev;
+
+        // La reubicación se hace con la transición apagada. Si no, el cambio
+        // de `--out-x` se animaría también, la ficha entraría desde el lado
+        // equivocado y el salto se leería como un temblor.
+        yearPanel.style.transition = 'none';
+        yearPanel.classList.toggle('side-r', toRight);
+        yearPanel.classList.toggle('side-l', !toRight);
+        yearPanel.style.setProperty('--out-x', toRight ? '38px' : '-38px');
+        void yearPanel.offsetWidth;          // reflow: fija el punto de partida
+        yearPanel.style.transition = '';
         yearPanel.classList.remove('swapping');
     };
 
-    if (REDUCE_MOTION) { write(); return; }
+    if (REDUCE_MOTION || firstWrite) { write(); return; }
+
+    // Sale hacia el lado en el que está ahora; el relevo la devuelve por el otro.
+    yearPanel.style.setProperty('--out-x', yearPanel.classList.contains('side-r') ? '38px' : '-38px');
     yearPanel.classList.add('swapping');
     clearTimeout(swapTimer);
-    swapTimer = setTimeout(write, 260);   // igual que la transición CSS
+    swapTimer = setTimeout(write, 300);   // igual que la transición de opacidad
 }
 
 function updateHUD(scroll) {
     const s = clamp(scroll, 0, 1);
     const e = eraIndexOfYear(yearIndex(s));
     if (e !== lastEra) {
-        elEra.textContent = ERAS[e].era;
         labelSpans.forEach((sp, i) => sp.classList.toggle('on', i === e));
         navLinks.forEach((l, i) => l.classList.toggle('current', i === e));
         lastEra = e;
@@ -2059,7 +2540,7 @@ function updateHUD(scroll) {
     elMarker.style.left = `${s * 100}%`;
 }
 
-function updateSlides(scroll) {
+function updateEraProgress(scroll) {
     for (let i = 1; i <= ERA_COUNT; i++) {
         const fill = document.getElementById(`dash-fill-${i}`);
         if (fill) {
@@ -2069,8 +2550,6 @@ function updateSlides(scroll) {
             fill.style.height = `${progress * 100}%`;
         }
     }
-    // El panel de datos acompaña todo el recorrido una vez pasada la portada.
-    elMonitor.classList.toggle('active', scroll > 0.02);
 }
 
 function updateGridDots(scroll) {
@@ -2112,15 +2591,29 @@ function animate() {
     const cursorOuter = document.querySelector('.cursor-outer');
     if (cursorOuter) { cursorOuter.style.left = `${outerCursorX}px`; cursorOuter.style.top = `${outerCursorY}px`; }
 
+    // Inercia del arrastre: al soltar, el aparato sigue girando y frena solo.
+    if (!dragging) {
+        dragYaw   += dragVelYaw;
+        dragPitch += dragVelPitch;
+        dragVelYaw   *= DRAG.FRICTION;
+        dragVelPitch *= DRAG.FRICTION;
+        if (Math.abs(dragVelYaw)   < 1e-4) dragVelYaw = 0;
+        if (Math.abs(dragVelPitch) < 1e-4) dragVelPitch = 0;
+    }
+    dragPitch = clamp(dragPitch, -DRAG.PITCH_LIMIT, DRAG.PITCH_LIMIT);
+
     if (modelPivot) {
-        modelPivot.rotation.y = mouseX * 0.25;
-        modelPivot.rotation.x = mouseY * 0.15;
+        // El giro del usuario se suma al balanceo del puntero, no lo sustituye:
+        // la cámara sigue orbitando y el arrastre es el mando que compensa el
+        // tramo en el que el aparato daba la espalda.
+        modelPivot.rotation.y = dragYaw + mouseX * 0.25;
+        modelPivot.rotation.x = dragPitch + mouseY * 0.15;
         modelPivot.position.y = -0.4 + Math.sin(time * 0.35) * 0.045;
     }
 
     // --- relevo de aparatos: nunca dos en pantalla a la vez ---
-    // eraF gobierna color de luz, partículas y panel de datos, que migran de
-    // forma continua; el aparato y el texto van por año, en saltos discretos.
+    // eraF gobierna color de luz y partículas, que migran de forma continua;
+    // el aparato y el texto van por año, en saltos discretos.
     const eraF = eraFloat(currentScroll);
     for (let i = 0; i < devices.length; i++) {
         const d = devices[i];
@@ -2207,12 +2700,11 @@ function animate() {
         shaderUniforms.uScroll.value = currentScroll;
     }
 
-    updateSlides(currentScroll);
+    updateEraProgress(currentScroll);
     updateGridDots(currentScroll);
     updateHUD(currentScroll);
     updateYearPanel(currentScroll);
 
-    if ((monitorFrame++ % 3) === 0) drawMonitor(eraF);
 
     renderer.render(scene, camera);
 }
@@ -2254,15 +2746,278 @@ window.addEventListener('mousemove', (event) => {
     targetMouseX = (event.clientX / window.innerWidth) * 2 - 1;
     targetMouseY = (event.clientY / window.innerHeight) * 2 - 1;
 });
-window.addEventListener('resize', onWindowResize);
+
+/* =========================================================
+   ARRASTRE PARA GIRAR EL APARATO
+   La cámara recorre una órbita completa a lo largo de la pieza, así que hay
+   un tramo del scroll en el que el aparato se ve por detrás. El giro es
+   acumulativo y NO se recentra al soltar: si el visitante lo pone de frente,
+   se queda de frente, incluso al cambiar de año.
+   ========================================================= */
+const DRAG = {
+    SENSITIVITY: 0.0075,   // radianes por píxel arrastrado
+    FRICTION: 0.94,        // frenado de la inercia por fotograma
+    PITCH_LIMIT: 0.62,     // ~35°: más allá se ve la tapa y se pierde la silueta
+    THRESHOLD: 3           // px antes de considerar que es un arrastre y no un clic
+};
+let dragYaw = 0, dragPitch = 0;
+let dragVelYaw = 0, dragVelPitch = 0;
+let dragging = false, dragMoved = false;
+let dragLastX = 0, dragLastY = 0, dragPointerId = null;
+
+canvas.addEventListener('pointerdown', (ev) => {
+    if (ev.button !== 0 && ev.pointerType === 'mouse') return;
+    dragging = true;
+    dragMoved = false;
+    dragPointerId = ev.pointerId;
+    dragLastX = ev.clientX;
+    dragLastY = ev.clientY;
+    dragVelYaw = dragVelPitch = 0;
+    // Con captura, el arrastre sobrevive a salir del lienzo y siempre llega
+    // el `pointerup`: sin ella, soltar fuera dejaría el aparato pegado al ratón.
+    // La captura sostiene el arrastre aunque el puntero salga del lienzo. Si
+    // el id no está activo (eventos sintéticos, punteros exóticos) lanza, y
+    // perder la captura no puede costar el arrastre entero.
+    try { canvas.setPointerCapture(ev.pointerId); } catch (_) { /* sin captura */ }
+    document.body.classList.add('model-drag');
+});
+
+canvas.addEventListener('pointermove', (ev) => {
+    if (!dragging || ev.pointerId !== dragPointerId) return;
+    const dx = ev.clientX - dragLastX;
+    const dy = ev.clientY - dragLastY;
+    dragLastX = ev.clientX;
+    dragLastY = ev.clientY;
+    if (!dragMoved && Math.hypot(dx, dy) < DRAG.THRESHOLD) return;
+    if (!dragMoved) document.body.classList.add('drag-known');
+    dragMoved = true;
+    dragVelYaw = dx * DRAG.SENSITIVITY;
+    dragVelPitch = dy * DRAG.SENSITIVITY;
+    dragYaw += dragVelYaw;
+    dragPitch = clamp(dragPitch + dragVelPitch, -DRAG.PITCH_LIMIT, DRAG.PITCH_LIMIT);
+});
+
+function endDrag(ev) {
+    if (!dragging || (ev && ev.pointerId !== dragPointerId)) return;
+    dragging = false;
+    dragPointerId = null;
+    document.body.classList.remove('model-drag');
+    if (REDUCE_MOTION) { dragVelYaw = dragVelPitch = 0; }
+}
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+
+/* ResizeObserver dispara también en el `observe()` inicial y ve el salto 0 → N
+   que el evento `resize` se pierde. El listener de `resize` se conserva porque
+   cubre los cambios de devicePixelRatio al hacer zoom, que el observador no ve. */
+new ResizeObserver(() => applyViewport()).observe(document.documentElement);
+window.addEventListener('resize', applyViewport);
+
+/* =========================================================
+   GRID DE LAS CINCO ERAS Y MODAL DE DETALLE
+   Las tarjetas se escriben desde ERAS[], YEARS[] y ERA_BOUNDS. El marcado
+   llega vacío a propósito: si los datos vivieran también en el HTML, una
+   copia acabaría quedándose atrás cuando cambiara la tabla.
+   ========================================================= */
+const eraGridEl  = document.getElementById('era-grid');
+const modalEl    = document.getElementById('era-modal');
+const modalKicker = document.getElementById('modal-kicker');
+const modalTitle  = document.getElementById('modal-title');
+const modalYears  = document.getElementById('modal-years');
+const modalSpend  = document.getElementById('modal-spend');
+const modalProv   = document.getElementById('modal-prov');
+
+/** Los años que caen dentro de una era, con los mismos cortes que usa la escena. */
+function yearsOfEra(e) {
+    return YEARS.slice(ERA_BOUNDS[e], ERA_BOUNDS[e + 1]);
+}
+
+function buildEraGrid() {
+    if (!eraGridEl) return;
+    const frag = document.createDocumentFragment();
+
+    ERAS.forEach((era, e) => {
+        const years = yearsOfEra(e);
+
+        /* La tarjeta es un <button>: foco, Enter y Espacio los da el navegador.
+           Reimplantarlos sobre un <div role="button"> solo añade formas de
+           equivocarse. */
+        const card = document.createElement('button');
+        card.type = 'button';
+        card.className = 'era-card';
+        card.id = `era-${e + 1}`;          // destino real de los enlaces de la nav
+        card.dataset.era = String(e);
+        card.setAttribute('aria-haspopup', 'dialog');
+
+        const yr = document.createElement('span');
+        yr.className = 'card-years';
+        yr.textContent = era.years;
+
+        const nm = document.createElement('span');
+        nm.className = 'card-era';
+        nm.textContent = era.era;
+
+        const ct = document.createElement('span');
+        ct.className = 'card-count';
+        ct.textContent = `${years.length} aparatos · ${years[0].sec} → ${years[years.length - 1].sec}`;
+
+        /* Barra decorativa: la cifra exacta vive en el modal, así que aquí no se
+           le sueltan seis porcentajes sin contexto a un lector de pantalla. */
+        const bar = document.createElement('span');
+        bar.className = 'card-bar';
+        bar.setAttribute('aria-hidden', 'true');
+        era.spend.forEach((pct, c) => {
+            if (!pct) return;
+            const seg = document.createElement('span');
+            seg.style.width = `${pct}%`;
+            seg.style.background = CATS[c].color;
+            bar.appendChild(seg);
+        });
+
+        const open = document.createElement('span');
+        open.className = 'card-open';
+        open.textContent = 'Ver el detalle';
+
+        card.append(yr, nm, ct, bar, open);
+        card.addEventListener('click', () => openEraModal(e, card));
+        frag.appendChild(card);
+    });
+
+    eraGridEl.appendChild(frag);
+
+    const cards = eraGridEl.querySelectorAll('.era-card');
+    if (REDUCE_MOTION) { cards.forEach(c => c.classList.add('in')); return; }
+
+    /* Entrada de una sola vez. El escalonado se deriva de `--stagger-char`, la
+       misma cadencia del titular: no se inventa vocabulario temporal nuevo. */
+    const io = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            const i = Number(entry.target.dataset.era);
+            entry.target.style.transitionDelay = `calc(var(--stagger-char) * ${i * 3})`;
+            entry.target.classList.add('in');
+            obs.unobserve(entry.target);
+        });
+    }, { threshold: 0.2 });
+    cards.forEach(c => io.observe(c));
+}
+
+/* --------------------- modal --------------------- */
+let modalOpen = false;
+let lastFocused = null;
+
+/* `inert` sobre los hermanos del diálogo: mientras el modal vive, el hero y el
+   grid dejan de existir para el tabulador y para el lector de pantalla. */
+function setBackgroundInert(on) {
+    for (const el of document.body.children) {
+        if (el === modalEl || el.tagName === 'SCRIPT') continue;
+        if (on) el.setAttribute('inert', ''); else el.removeAttribute('inert');
+    }
+}
+
+function openEraModal(e, invoker) {
+    const era = ERAS[e];
+    lastFocused = invoker || document.activeElement;
+
+    modalKicker.textContent = era.years;
+    modalTitle.textContent = era.era;
+
+    // Izquierda: los años de la era, cada uno con su aparato y su modelo.
+    modalYears.replaceChildren();
+    for (const rec of yearsOfEra(e)) {
+        const li = document.createElement('li');
+        const y = document.createElement('span');
+        y.className = 'my-y';
+        y.textContent = String(rec.y);
+        const box = document.createElement('div');
+        const dev = document.createElement('div');
+        dev.className = 'my-dev';
+        dev.textContent = rec.dev;
+        const meta = document.createElement('div');
+        meta.className = 'my-meta';
+        meta.textContent = `${rec.sec} · ${rec.ad}`;
+        box.append(dev, meta);
+        li.append(y, box);
+        modalYears.appendChild(li);
+    }
+
+    // Derecha: las seis categorías con su porcentaje.
+    modalSpend.replaceChildren();
+    CATS.forEach((cat, c) => {
+        const li = document.createElement('li');
+        const dot = document.createElement('span');
+        dot.className = 'ms-dot';
+        dot.style.background = cat.color;
+        dot.setAttribute('aria-hidden', 'true');
+        const nm = document.createElement('span');
+        nm.className = 'ms-name';
+        nm.textContent = cat.name;
+        const pc = document.createElement('span');
+        pc.className = 'ms-pct';
+        pc.textContent = `${era.spend[c]} %`;
+        li.append(dot, nm, pc);
+        modalSpend.appendChild(li);
+    });
+
+    /* Invariante nº4: única declaración de procedencia que queda en la pieza. */
+    modalProv.textContent = era.sourced ? '% mundial · dato publicado'
+                                        : '% mundial · interpolado';
+    modalProv.className = 'modal-prov ' + (era.sourced ? 'sourced' : 'interp');
+
+    modalEl.hidden = false;
+    setBackgroundInert(true);
+    modalOpen = true;
+    document.documentElement.style.overflow = 'hidden';
+    void modalEl.offsetWidth;              // fija el estado inicial antes de animar
+    modalEl.classList.add('open');
+    modalEl.querySelector('.modal-close').focus();
+}
+
+function closeEraModal() {
+    if (!modalOpen) return;
+    modalOpen = false;
+    modalEl.classList.remove('open');
+    setBackgroundInert(false);
+    document.documentElement.style.overflow = '';
+
+    // Se oculta al terminar el fundido; el temporizador es el seguro por si el
+    // evento no llega (transición interrumpida, pestaña en segundo plano).
+    let done = false;
+    const hide = () => { if (!done) { done = true; modalEl.hidden = true; } };
+    if (REDUCE_MOTION) hide();
+    else {
+        modalEl.querySelector('.modal-card').addEventListener('transitionend', hide, { once: true });
+        setTimeout(hide, 1000);
+    }
+
+    if (lastFocused) lastFocused.focus();  // el foco vuelve a la tarjeta de origen
+    lastFocused = null;
+}
+
+const FOCUSABLE = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+document.addEventListener('keydown', (ev) => {
+    if (!modalOpen) return;
+    if (ev.key === 'Escape') { ev.preventDefault(); closeEraModal(); return; }
+    if (ev.key !== 'Tab') return;
+    // Foco atrapado: el tabulador circula dentro del diálogo, no se escapa.
+    const items = [...modalEl.querySelectorAll(FOCUSABLE)].filter(el => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+    else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+});
+modalEl.addEventListener('click', (ev) => {
+    if (ev.target.hasAttribute('data-close')) closeEraModal();
+});
 
 /* =========================================================
    ARRANQUE
    ========================================================= */
 splitTitlesIntoChars();
 initScene();
-onWindowResize();
-drawMonitor(0);
+buildEraGrid();
+updateYearPanel(0);   // la ficha llega escrita al primer fotograma, no vacía
+applyViewport();
 animate();
 setupNavigation();
 
