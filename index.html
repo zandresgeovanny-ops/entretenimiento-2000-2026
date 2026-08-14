@@ -108,6 +108,15 @@ body.model-drag .cursor-outer {
     background: rgba(255, 255, 255, 0.14);
     border-color: rgba(255, 255, 255, 0.95);
 }
+/* Sobre algo pulsable el anillo se abre y se afirma. Con el puntero nativo
+   oculto en toda la pieza, este es el único aviso de que hay un objetivo
+   debajo: sin él, las tarjetas de era no parecen pulsables. El arrastre del
+   modelo gana al hover, porque describe lo que está pasando ahora mismo. */
+body.cursor-hot:not(.model-drag) .cursor-outer {
+    width: 54px; height: 54px;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.95);
+}
 
 /* ---------------- cursor ---------------- */
 .cursor-inner {
@@ -127,7 +136,13 @@ body.model-drag .cursor-outer {
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 9998;
-    transition: width 0.3s, height 0.3s, background 0.3s;
+    /* border-color faltaba: el anillo cambiaba de grosor de golpe al entrar en
+       un objetivo mientras el tamaño sí interpolaba. Se enumeran las
+       propiedades una a una, nunca `all`. */
+    transition: width var(--dur-micro) var(--ease-micro),
+                height var(--dur-micro) var(--ease-micro),
+                background var(--dur-micro) var(--ease-micro),
+                border-color var(--dur-micro) var(--ease-micro);
 }
 
 /* ---------------- overlay ---------------- */
@@ -1475,6 +1490,9 @@ let mouseX = 0, mouseY = 0, targetMouseX = 0, targetMouseY = 0;
 
 let cursorX = window.innerWidth / 2, cursorY = window.innerHeight / 2;
 let outerCursorX = window.innerWidth / 2, outerCursorY = window.innerHeight / 2;
+/* Cacheados: se escribían con querySelector en cada fotograma. */
+const cursorInnerEl = document.querySelector('.cursor-inner');
+const cursorOuterEl = document.querySelector('.cursor-outer');
 
 let bgMaterial;
 const shaderUniforms = {
@@ -2617,6 +2635,20 @@ function animate() {
     const targetScroll = heroProgress();
     updateHeroChrome(targetScroll);
 
+    // El anillo se persigue SIEMPRE, también con el hero ya fuera de pantalla.
+    // Estaba después del `return` de abajo: al llegar al grid, el bucle cortaba
+    // antes de este lerp y el anillo se quedaba clavado donde se hubiera
+    // detenido, mientras el punto interior seguía al puntero desde el listener
+    // de mousemove. Son dos multiplicaciones y dos escrituras de estilo: no hay
+    // nada que ahorrar apagándolas, y el puntero nativo está oculto en toda la
+    // página, así que sin el anillo el grid se queda sin cursor visible.
+    outerCursorX += (cursorX - outerCursorX) * 0.2;
+    outerCursorY += (cursorY - outerCursorY) * 0.2;
+    if (cursorOuterEl) {
+        cursorOuterEl.style.left = `${outerCursorX}px`;
+        cursorOuterEl.style.top = `${outerCursorY}px`;
+    }
+
     // Hero fuera de pantalla: se detiene el trabajo de GPU y de DOM mientras
     // el usuario está en las secciones siguientes.
     if (heroStage.style.visibility === 'hidden') return;
@@ -2625,11 +2657,6 @@ function animate() {
 
     mouseX += (targetMouseX - mouseX) * 0.05;
     mouseY += (targetMouseY - mouseY) * 0.05;
-
-    outerCursorX += (cursorX - outerCursorX) * 0.2;
-    outerCursorY += (cursorY - outerCursorY) * 0.2;
-    const cursorOuter = document.querySelector('.cursor-outer');
-    if (cursorOuter) { cursorOuter.style.left = `${outerCursorX}px`; cursorOuter.style.top = `${outerCursorY}px`; }
 
     // Inercia del arrastre: al soltar, el aparato sigue girando y frena solo.
     if (!dragging) {
@@ -2778,13 +2805,26 @@ function setupNavigation() {
     if (coverCta) coverCta.addEventListener('click', () => scrollToHero(HERO.CTA_TARGET));
 }
 
+/* Elementos ante los que el cursor debe declararse interactivo. Las tarjetas
+   de era son el caso que motivó esto: se abren al pulsarlas, pero con el
+   puntero nativo oculto no había ninguna señal de que fueran pulsables. */
+const HOT_SELECTOR = 'a, button, .era-card, [role="button"]';
+
 window.addEventListener('mousemove', (event) => {
     cursorX = event.clientX;
     cursorY = event.clientY;
-    const cursorInner = document.querySelector('.cursor-inner');
-    if (cursorInner) { cursorInner.style.left = `${cursorX}px`; cursorInner.style.top = `${cursorY}px`; }
+    if (cursorInnerEl) {
+        cursorInnerEl.style.left = `${cursorX}px`;
+        cursorInnerEl.style.top = `${cursorY}px`;
+    }
     targetMouseX = (event.clientX / window.innerWidth) * 2 - 1;
     targetMouseY = (event.clientY / window.innerHeight) * 2 - 1;
+
+    // `closest` cubre los hijos: el puntero sobre el título de una tarjeta
+    // sigue estando sobre la tarjeta.
+    const t = event.target;
+    const hot = !!(t && t.closest && t.closest(HOT_SELECTOR));
+    document.body.classList.toggle('cursor-hot', hot);
 });
 
 /* =========================================================
