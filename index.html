@@ -455,6 +455,21 @@ a:focus-visible, button:focus-visible {
 }
 .yp-dis b { color: #e6ebf1; font-weight: 500; }
 
+/* Ajuste por medición, no por breakpoint.
+   Las reglas de `@media (max-height)` de más abajo suponen que todas las fichas
+   miden lo mismo, y no es cierto: el texto de cada año tiene su propio largo,
+   así que a igual altura de pantalla unas caben y otras se recortaban contra
+   el `overflow: hidden`. `fitCard()` mide la ficha ya escrita y va aplicando
+   estos escalones hasta que entra. El orden respeta el mismo criterio de peso
+   argumental: primero se va el contexto, luego la ventaja, luego la letra
+   pequeña de las desventajas y solo al final una desventaja entera. El
+   aparato, el modelo publicitario y al menos dos desventajas no se van nunca. */
+.year-panel.fit-1 .yp-desc { display: none; }
+.year-panel.fit-2 .yp-h-v,
+.year-panel.fit-2 #yp-adv { display: none; }
+.year-panel.fit-3 .yp-dt { display: none; }
+.year-panel.fit-4 .yp-dis li:nth-child(3) { display: none; }
+
 /* El relevo: la ficha entera sale, cambia de lado y vuelve a entrar. Se
    anima el bloque completo y no cada hijo por separado, porque el cambio
    de posición es parte del mensaje: si algo se mueve, algo ha cambiado. */
@@ -2314,6 +2329,9 @@ function applyViewport() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     if (shaderUniforms) shaderUniforms.uResolution.value.set(w, h);
     measureLayout();
+    // Al cambiar la altura útil cambia lo que cabe en la ficha: se recalcula
+    // el recorte sobre el contenido que esté puesto en ese momento.
+    fitCard();
     return true;
 }
 
@@ -2457,6 +2475,25 @@ function updateHeroChrome(p) {
 let lastYearIdx = -1, lastEra = -1;
 let swapTimer = null;
 
+/* Escalones de recorte, del menos al más costoso en contenido. */
+const FIT_STEPS = ['fit-1', 'fit-2', 'fit-3', 'fit-4'];
+
+/** Retira bloques hasta que la ficha entra en su caja.
+ *  Sin esto, los años de texto más largo se cortaban a media frase contra el
+ *  `overflow: hidden`. Se mide después de escribir y solo al cambiar de año o
+ *  al redimensionar, nunca por fotograma: lee `scrollHeight`, que fuerza layout. */
+function fitCard() {
+    if (!yearPanel) return;
+    for (const c of FIT_STEPS) yearPanel.classList.remove(c);
+    // +2px de tolerancia: el redondeo subpíxel de `clamp()` puede dar un
+    // desbordamiento de una fracción que no se ve pero dispararía el recorte.
+    if (yearPanel.scrollHeight <= yearPanel.clientHeight + 2) return;
+    for (const c of FIT_STEPS) {
+        yearPanel.classList.add(c);
+        if (yearPanel.scrollHeight <= yearPanel.clientHeight + 2) return;
+    }
+}
+
 /** Releva el contenido del panel: sale, se reescribe, entra. Al ser un único
  *  nodo el que se reescribe, dos años no pueden coexistir en pantalla. */
 function updateYearPanel(s) {
@@ -2517,6 +2554,9 @@ function updateYearPanel(s) {
         void yearPanel.offsetWidth;          // reflow: fija el punto de partida
         yearPanel.style.transition = '';
         yearPanel.classList.remove('swapping');
+
+        // Con el contenido ya en el DOM se puede medir de verdad si cabe.
+        fitCard();
     };
 
     if (REDUCE_MOTION || firstWrite) { write(); return; }
