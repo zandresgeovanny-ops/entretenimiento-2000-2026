@@ -38,7 +38,10 @@
        fijar 116px por ancho: en una pantalla de 1328×568 el título medía lo
        mismo que en una pantalla alta y se comía la ficha del año. Al acotar
        también por altura, el titular cede espacio en viewports apaisados. */
-    --fs-display: clamp(34px, min(6.6vw, 12.5vh), 104px);  /* portada */
+    /* 12.5vh daba 3 líneas de 62px en una pantalla de 500: la portada subía
+       por encima de la franja del encabezado. A 10vh el titular cede altura
+       antes de invadirla. */
+    --fs-display: clamp(30px, min(5.8vw, 10vh), 96px);     /* portada */
     --fs-title:   clamp(30px, min(5.6vw, 10.5vh), 88px);   /* títulos de era */
     --fs-body:    clamp(13px, min(1.05vw, 2.6vh), 16px);
     --fs-stand:   clamp(14px, min(1.15vw, 2.9vh), 17px);
@@ -159,18 +162,15 @@ body.cursor-hot:not(.model-drag) .cursor-outer {
     box-sizing: border-box;
 }
 
+/* Sin rótulo, la navegación se agrupa a la derecha junto al botón. La mitad
+   izquierda de la franja superior queda despejada, que es por donde sube el
+   titular de portada. */
 .main-header {
-    display: flex; justify-content: space-between; align-items: center;
+    display: flex; justify-content: flex-end; align-items: center;
+    gap: clamp(18px, 2.4vw, 34px);
     width: 100%; z-index: 20;
     pointer-events: auto;
     padding: 20px 0;
-}
-.brand-block { display: flex; align-items: baseline; gap: 14px; }
-.brand { font-size: 14px; font-weight: 600; letter-spacing: 5px; text-transform: uppercase; }
-.brand-sub {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px; letter-spacing: 3px;
-    color: rgba(255, 255, 255, 0.4);
 }
 .header-nav { display: flex; align-items: center; gap: 22px; }
 .nav-link {
@@ -252,6 +252,22 @@ a:focus-visible, button:focus-visible {
     width: min(58vw, 900px);
     z-index: 30;
     pointer-events: none;
+    /* Tope duro: la portada se ancla por abajo, así que su borde superior sube
+       con el contenido. Sin esto, en una pantalla apaisada el titular se metía
+       debajo de la franja del encabezado. Las reglas de altura de más abajo
+       están para que este tope no llegue a activarse. */
+    max-height: calc(100vh - 104px);
+}
+/* Escalones por altura, en orden inverso de peso: primero se va la bajada
+   (el titular ya cuenta la tesis), después el rango de años (que la línea de
+   tiempo inferior repite). El titular y el botón de entrada no se van nunca. */
+@media (max-height: 620px) {
+    .cover-standfirst { display: none; }
+    .cover-kicker { margin-bottom: 16px; }
+}
+@media (max-height: 520px) {
+    .cover-span { display: none; }
+    .cover-cta { margin-top: 22px; }
 }
 .cover-kicker {
     font-family: 'IBM Plex Mono', monospace;
@@ -758,6 +774,50 @@ body.drag-known .yt-hint { opacity: 0; }
 }
 .card-bar span { display: block; height: 100%; }
 
+/* Resumen temático de la era. */
+.card-sum {
+    font-size: 13px;
+    line-height: 1.6;
+    font-weight: 300;
+    color: #b9c0c9;
+    text-wrap: pretty;
+    margin-top: 4px;
+}
+/* Modelos publicitarios: la otra mitad del tema. */
+.card-ads { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.card-chip {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase;
+    padding: 4px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.17);
+    border-radius: 20px;
+    color: rgba(255, 255, 255, 0.66);
+    white-space: nowrap;
+}
+/* Canal dominante, con el color que le corresponde en la barra. */
+.card-fact {
+    display: flex; align-items: center; gap: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px; letter-spacing: 1.2px;
+    margin-top: 8px;
+}
+.card-fact i {
+    width: 7px; height: 7px; border-radius: 50%;
+    flex: 0 0 auto;
+}
+.card-fact b {
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.82);
+    font-variant-numeric: tabular-nums;
+}
+.card-fact em {
+    font-style: normal;
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.32);
+    margin-left: auto;
+    white-space: nowrap;
+}
+
 .card-open {
     font-family: 'IBM Plex Mono', monospace;
     font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
@@ -1038,11 +1098,11 @@ body.drag-known .yt-hint { opacity: 0; }
 
 <div class="cinematic-container">
 
+    <!-- El rótulo «Atención · 2000 — 2026» vivía aquí y chocaba de frente con
+         el titular de portada, que crece hacia arriba desde la izquierda. Se
+         retira: el <title> del documento y el propio titular ya dicen de qué
+         va la pieza, y la esquina queda libre para el texto. -->
     <div class="main-header">
-        <div class="brand-block">
-            <div class="brand">Atención</div>
-            <div class="brand-sub">2000 — 2026</div>
-        </div>
         <nav class="header-nav">
             <a href="#era-1" class="nav-link">Señal</a>
             <span class="nav-dot"></span>
@@ -1177,22 +1237,27 @@ const ERAS = [
       sparkA: '#ff9d2e', sparkB: '#7fe0a8',
       // TV 37% y periódicos 29,8% del gasto mundial en 2005 (ZenithOptimedia);
       // internet 3,8%. Revistas incluidas en impresos.
-      spend: [37, 43, 16, 4, 0, 0], sourced: true },
+      spend: [37, 43, 16, 4, 0, 0], sourced: true,
+      sum: 'Un país entero veía lo mismo a la misma hora. El disco, el DVD y la taquilla sostenían la industria, y la publicidad compraba interrupciones: alcance masivo, medición gruesa y ninguna respuesta de vuelta.' },
     { years: '2006 — 2011', era: 'La era del clic',     rim: '#dce9ff', glow: '#9fd8ff',
       sparkA: '#ffd98a', sparkB: '#8fd0ff',
-      spend: [38, 33, 15, 13, 1, 0], sourced: false },
+      spend: [38, 33, 15, 13, 1, 0], sourced: false,
+      sum: 'El catálogo se suelta del horario y la audiencia se fragmenta. El clic pasa a ser la prueba de que alguien estuvo ahí, y el anuncio empieza a venderse por impresión, por intención y por el sitio que ocupa antes del vídeo.' },
     { years: '2012 — 2017', era: 'La era del perfil',   rim: '#c9fff2', glow: '#65f0d4',
       sparkA: '#ff6bb5', sparkB: '#67f0d8',
-      spend: [36, 17, 13, 25, 7, 2], sourced: false },
+      spend: [36, 17, 13, 25, 7, 2], sourced: false,
+      sum: 'El entretenimiento cabe en un bolsillo y se consume a solas. El estreno deja de ser un evento colectivo y pasa a ser una notificación; la marca deja de interrumpir y empieza a parecerse al contenido.' },
     { years: '2018 — 2022', era: 'La era de la subasta', rim: '#ffc6e6', glow: '#ff4fa3',
       sparkA: '#ff4fa3', sparkB: '#8f7bff',
-      spend: [22, 8, 10, 34, 18, 8], sourced: false },
+      spend: [22, 8, 10, 34, 18, 8], sourced: false,
+      sum: 'El feed recomienda en lugar de programar. La compra de medios se automatiza en subastas de milisegundos y la televisión conectada hereda el presupuesto que antes iba al prime time.' },
     { years: '2023 — 2026', era: 'La era del modelo',   rim: '#cdd6ff', glow: '#a06bff',
       sparkA: '#a06bff', sparkB: '#5fd8ff',
       // 2026: digital = 73% del gasto mundial (740 mM $ de 1,06 B $). Dentro del
       // digital, buscador 40% y display 18% → 41% del total; social 32% → 23%;
       // vídeo/CTV 10% más retail media (62 mM $) → 13%. TV lineal ~11%.
-      spend: [11, 4, 8, 41, 23, 13], sourced: true }
+      spend: [11, 4, 8, 41, 23, 13], sourced: true,
+      sum: 'Producción y publicidad comparten herramienta. Sin cookies de terceros mandan el dato propio y el comercio: la tienda se vuelve medio, el creador es el canal y la atención, el inventario más escaso del catálogo.' }
 ];
 const ERA_COUNT = ERAS.length;
 
@@ -2954,11 +3019,45 @@ function buildEraGrid() {
             bar.appendChild(seg);
         });
 
+        /* Qué pasó en esa era. Sin esto la tarjeta daba fechas y recuento de
+           aparatos, pero nada del asunto que la pieza cuenta. */
+        const sum = document.createElement('span');
+        sum.className = 'card-sum';
+        sum.textContent = era.sum;
+
+        /* Modelos publicitarios de la era, tomados de los propios años: son la
+           otra mitad del tema y no aparecían en ninguna tarjeta. Se muestran
+           tres; el resto queda para el modal. */
+        const adsWrap = document.createElement('span');
+        adsWrap.className = 'card-ads';
+        const seen = [];
+        years.forEach(y => { if (!seen.includes(y.ad)) seen.push(y.ad); });
+        seen.slice(0, 3).forEach(txt => {
+            const chip = document.createElement('span');
+            chip.className = 'card-chip';
+            chip.textContent = txt;
+            adsWrap.appendChild(chip);
+        });
+
+        /* Canal que se lleva la mayor parte del gasto en esa era, derivado del
+           propio reparto para que no pueda contradecir a la barra. */
+        let top = 0;
+        era.spend.forEach((pct, c) => { if (pct > era.spend[top]) top = c; });
+        const fact = document.createElement('span');
+        fact.className = 'card-fact';
+        const dot = document.createElement('i');
+        dot.style.background = CATS[top].color;
+        const factTxt = document.createElement('b');
+        factTxt.textContent = `${CATS[top].name} · ${era.spend[top]} %`;
+        const factSrc = document.createElement('em');
+        factSrc.textContent = era.sourced ? 'dato publicado' : 'interpolado';
+        fact.append(dot, factTxt, factSrc);
+
         const open = document.createElement('span');
         open.className = 'card-open';
         open.textContent = 'Ver el detalle';
 
-        card.append(yr, nm, ct, bar, open);
+        card.append(yr, nm, ct, sum, adsWrap, bar, fact, open);
         card.addEventListener('click', () => openEraModal(e, card));
         frag.appendChild(card);
     });
