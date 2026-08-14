@@ -486,6 +486,19 @@ a:focus-visible, button:focus-visible {
 }
 .yp-dis b { color: #e6ebf1; font-weight: 500; }
 
+/* Qué cambió en publicidad ese año. Va marcado con una barra del color de la
+   era porque es el hilo que la pieza sigue: el resto de la ficha describe el
+   aparato, esta línea describe el negocio que lo pagaba. */
+.yp-evo {
+    font-size: clamp(11.5px, min(0.86vw, 2.1vh), 13.5px);
+    line-height: 1.55;
+    font-weight: 300;
+    color: #cfd6de;
+    border-left: 2px solid var(--era-glow, #ffb14a);
+    padding-left: 10px;
+    margin-bottom: clamp(10px, 1.6vh, 16px);
+}
+
 /* Ajuste por medición, no por breakpoint.
    Las reglas de `@media (max-height)` de más abajo suponen que todas las fichas
    miden lo mismo, y no es cierto: el texto de cada año tiene su propio largo,
@@ -500,6 +513,9 @@ a:focus-visible, button:focus-visible {
 .year-panel.fit-2 #yp-adv { display: none; }
 .year-panel.fit-3 .yp-dt { display: none; }
 .year-panel.fit-4 .yp-dis li:nth-child(3) { display: none; }
+/* La evolución publicitaria se retira la última: es el hilo del que va la
+   pieza, así que sobrevive a la ventaja, al contexto y a una desventaja. */
+.year-panel.fit-5 .yp-evo { display: none; }
 
 /* El relevo: la ficha entera sale, cambia de lado y vuelve a entrar. Se
    anima el bloque completo y no cada hijo por separado, porque el cambio
@@ -896,6 +912,43 @@ body.drag-known .yt-hint { opacity: 0; }
     padding-right: 44px;   /* deja sitio al botón de cierre */
 }
 
+/* Resumen de la era, el mismo texto que abre la tarjeta. */
+.modal-sum {
+    font-size: 15px; line-height: 1.65; font-weight: 300;
+    color: #c9d0d9;
+    text-wrap: pretty;
+    margin: -14px 0 clamp(20px, 2.6vh, 30px);
+    max-width: 68ch;
+}
+/* Evolución publicitaria de la era: el hilo que la pieza sigue, así que va
+   antes del desglose de años y con su propia superficie. */
+.modal-evo {
+    border: 1px solid rgba(255, 255, 255, 0.11);
+    border-left: 2px solid var(--modal-glow, #ffb14a);
+    background: rgba(255, 255, 255, 0.026);
+    padding: clamp(14px, 2vh, 20px) clamp(16px, 1.6vw, 22px);
+    margin-bottom: clamp(24px, 3vh, 36px);
+}
+.modal-evo-txt {
+    font-size: 14px; line-height: 1.65; font-weight: 300;
+    color: #d5dbe3;
+    text-wrap: pretty;
+    margin-bottom: 14px;
+}
+.modal-evo-list { display: flex; flex-direction: column; gap: 7px; }
+.modal-evo-list li {
+    list-style: none;
+    display: grid; grid-template-columns: 4.5ch 1fr; gap: 12px;
+    font-size: 12.5px; line-height: 1.55; font-weight: 300;
+    color: #aab2bc;
+}
+.modal-evo-list b {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 400;
+    color: var(--modal-glow, #ffb14a);
+    font-variant-numeric: tabular-nums;
+}
+
 .modal-cols {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
@@ -1140,6 +1193,7 @@ body.drag-known .yt-hint { opacity: 0; }
     <p class="yp-adv" id="yp-adv"></p>
     <p class="yp-h">Modelo publicitario</p>
     <p class="yp-adv"><b id="yp-ad">Spot de 30 segundos.</b> <span id="yp-ads"></span></p>
+    <p class="yp-evo" id="yp-evo"></p>
     <p class="yp-h">Desventajas</p>
     <ul class="yp-dis" id="yp-dis"></ul>
 </div>
@@ -1211,6 +1265,12 @@ body.drag-known .yt-hint { opacity: 0; }
         <button class="modal-close" type="button" data-close aria-label="Cerrar el detalle de la era">&times;</button>
         <p class="modal-kicker" id="modal-kicker"></p>
         <h3 class="modal-title" id="modal-title"></h3>
+        <p class="modal-sum" id="modal-sum"></p>
+        <div class="modal-evo">
+            <h4 class="modal-h">Cómo cambió la publicidad</h4>
+            <p class="modal-evo-txt" id="modal-evo"></p>
+            <ul class="modal-evo-list" id="modal-evo-list"></ul>
+        </div>
         <div class="modal-cols">
             <div>
                 <h4 class="modal-h">Los años</h4>
@@ -1322,6 +1382,55 @@ const CATS = [
      medido (`max-height` en .year-panel). Alargar un párrafo aquí desborda
      el panel en portátiles bajos; si hay que ampliar, hay que medir antes.
    ========================================================= */
+/* =========================================================
+   CÓMO CAMBIÓ LA PUBLICIDAD, AÑO A AÑO
+   Va en su propio array y no dentro de STORY para no reescribir los
+   veintisiete registros existentes. Se enlaza por índice.
+
+   Criterio: cada línea apunta a un hecho fechado y documentado, no a una
+   impresión general. Donde el cambio es una tendencia y no un suceso con
+   fecha, se redacta como tendencia y no se le pone año falso.
+   ========================================================= */
+/* El mismo hilo contado por eras, para el modal. Resume lo que las líneas
+   por año detallan debajo. */
+const ERA_EVO = [
+ 'La publicidad entra en la década comprando alcance: se paga por punto de rating, se mide con paneles de unos miles de hogares y se extrapola al país entero. El estallido de las puntocom devuelve a la televisión el dinero que había empezado a irse a los banners, y el coste por clic asoma como la primera alternativa medible de verdad.',
+ 'El anuncio deja de venderse por presencia y pasa a venderse por acto: impresión servida, clic o intención declarada en un buscador. La compra de YouTube convierte el vídeo de aficionado en inventario, las redes estrenan la segmentación por perfil declarado y la recesión acelera la fuga desde los impresos.',
+ 'El móvil se lleva el tiempo de uso y obliga a rehacer todos los formatos. La pieza pagada adopta la forma del contenido que la rodea y el creador se profesionaliza como canal. Aparecen los primeros frenos: bloqueadores, fraude por tráfico falso y marcas que retiran inversión por aparecer donde no querían.',
+ 'La compra se automatiza en subastas de milisegundos, pero el suelo se mueve debajo: el reglamento europeo obliga a pedir consentimiento y la transparencia de rastreo de Apple rompe la medición en móvil. La televisión conectada hereda el presupuesto del prime time y el confinamiento convierte la tienda en canal de medios.',
+ 'Sin cookies de terceros, mandan el dato propio y el retail media. Los modelos generativos entran en la producción del anuncio y abaratan hacer una variante por persona; el asistente conversacional le disputa al buscador el papel de superficie de recomendación.'
+];
+
+const AD_EVO = [
+/*2000*/ 'Estalla la burbuja puntocom en marzo: la inversión en banners se hunde y el presupuesto vuelve a la televisión.',
+/*2001*/ 'Con el mercado digital caído, los portales prueban a cobrar suscripción en vez de vivir del anuncio.',
+/*2002*/ 'Google estrena el coste por clic en AdWords: se empieza a pagar por intención declarada, no por presencia.',
+/*2003*/ 'El grabador digital doméstico populariza saltarse los cortes: primera amenaza real al spot de 30 segundos.',
+/*2004*/ 'La lista de no llamar en Estados Unidos frena el telemarketing y desplaza dinero a medios de permiso.',
+/*2005*/ 'El emplazamiento de producto se vuelve moneda corriente en telerrealidad y videojuegos.',
+/*2006*/ 'Google compra YouTube: el vídeo subido por cualquiera se convierte en inventario publicitario.',
+/*2007*/ 'Facebook lanza su plataforma de anuncios y estrena la segmentación por perfil declarado.',
+/*2008*/ 'La recesión acelera el traspaso de presupuesto de los impresos al buscador, medible al céntimo.',
+/*2009*/ 'El vídeo bajo demanda separa dos modelos que aún conviven: suscripción sin anuncios frente a gratuito con ellos.',
+/*2010*/ 'El anuncio en aplicación móvil se desgaja del display de escritorio y crea su propio mercado.',
+/*2011*/ 'Las plataformas de compra automatizada empiezan a subastar impresiones en tiempo real.',
+/*2012*/ 'El móvil supera al escritorio en tiempo de uso y obliga a rehacer todos los formatos.',
+/*2013*/ 'El anuncio nativo se normaliza: la pieza pagada adopta la forma del contenido que la rodea.',
+/*2014*/ 'El fraude por tráfico falso y la visibilidad real de la impresión entran en la agenda del anunciante.',
+/*2015*/ 'Los bloqueadores de anuncios se generalizan y fuerzan a aligerar los formatos.',
+/*2016*/ 'El marketing de influencia se profesionaliza y los reguladores exigen declarar lo patrocinado.',
+/*2017*/ 'Grandes marcas retiran inversión de las plataformas por aparecer junto a contenido inadecuado.',
+/*2018*/ 'El reglamento europeo de protección de datos obliga a pedir consentimiento explícito para rastrear.',
+/*2019*/ 'El vídeo vertical y la historia efímera se consolidan como formato publicitario con reglas propias.',
+/*2020*/ 'El confinamiento dispara el consumo en casa y convierte el comercio electrónico en canal de medios.',
+/*2021*/ 'La transparencia de rastreo de Apple rompe la medición en móvil y encarece la captación.',
+/*2022*/ 'El directo de compra junta contenido y transacción en la misma pantalla.',
+/*2023*/ 'La retirada anunciada de las cookies de terceros empuja al dato propio y al retail media.',
+/*2024*/ 'Los modelos generativos entran en la producción del anuncio y abaratan la variante por persona.',
+/*2025*/ 'El asistente conversacional se vuelve superficie de recomendación y disputa el papel del buscador.',
+/*2026*/ 'La atención pasa a ser el inventario escaso: se produce creatividad distinta para cada destinatario.'
+];
+
 const STORY = [
 {
  d: 'El consumo va a hora fija y en familia: la televisión abierta reparte la audiencia de un país entero y el cine sostiene la taquilla. Internet existe, pero como catálogo de texto.',
@@ -2471,9 +2580,19 @@ const HERO = {
     COVER_FADE_END: 0.045,    // la portada se disuelve en el primer 4.5% del hero
     COVER_RISE: 48,           // px que sube la portada al salir
     STAGE_FADE_START: 0.955,  // el escenario 3D empieza a ceder el paso al grid
-    SCROLL_LERP: 0.025,       // inercia del recorrido (0 = congelado, 1 = sin inercia)
+    /* Inercia del recorrido (0 = congelado, 1 = sin inercia). A 0.025 la escena
+       llegaba con un retraso muy visible respecto a la rueda: se percibía como
+       lentitud, no como suavidad. A 0.07 sigue habiendo amortiguación —el
+       movimiento no es seco— pero la imagen alcanza al dedo. */
+    SCROLL_LERP: 0.07,
+    CAM_LERP: 0.07,           // el mismo criterio para el desplazamiento de cámara
     CTA_TARGET: 0.10          // adonde salta el CTA: primera era ya asentada
 };
+
+/* Amplitud del balanceo de cámara, en radianes: ±49° respecto al frente.
+   Subirlo enseña más perfil; pasado ~1.4 rad el aparato empieza a mostrar el
+   costado trasero, que es justo lo que se quiso evitar. */
+const ORBIT_MAX = 0.85;
 
 /* Índice del primer año de cada era, más el cierre. Las cinco eras siguen
    gobernando color, luz y panel de datos; los 27 años, el aparato y el texto. */
@@ -2504,6 +2623,7 @@ const ypEraName = document.getElementById('yp-eraname');
 const ypDesc = document.getElementById('yp-desc');
 const ypAdv = document.getElementById('yp-adv');
 const ypAds = document.getElementById('yp-ads');
+const ypEvo = document.getElementById('yp-evo');
 const ypDis = document.getElementById('yp-dis');
 
 /** Progreso 0..1 dentro del hero, medido contra la propia sección.
@@ -2559,7 +2679,7 @@ let lastYearIdx = -1, lastEra = -1;
 let swapTimer = null;
 
 /* Escalones de recorte, del menos al más costoso en contenido. */
-const FIT_STEPS = ['fit-1', 'fit-2', 'fit-3', 'fit-4'];
+const FIT_STEPS = ['fit-1', 'fit-2', 'fit-3', 'fit-4', 'fit-5'];
 
 /** Retira bloques hasta que la ficha entra en su caja.
  *  Sin esto, los años de texto más largo se cortaban a media frase contra el
@@ -2603,6 +2723,7 @@ function updateYearPanel(s) {
         ypDesc.textContent = st.d;
         ypAdv.textContent = st.v;
         ypAds.textContent = st.a;
+        if (ypEvo) ypEvo.textContent = AD_EVO[idx];
 
         // Se reconstruye la lista en vez de reescribir nodos existentes:
         // son tres elementos, y así no hay estado que quede desincronizado.
@@ -2733,11 +2854,14 @@ function animate() {
         if (Math.abs(dragVelPitch) < 1e-4) dragVelPitch = 0;
     }
     dragPitch = clamp(dragPitch, -DRAG.PITCH_LIMIT, DRAG.PITCH_LIMIT);
+    // Igual que el cabeceo: el giro se acota para que ni arrastrando se llegue
+    // a ver la trasera. Al topar, se corta también la inercia; si no, el
+    // modelo se quedaba empujando contra el límite sin moverse.
+    if (dragYaw > DRAG.YAW_LIMIT || dragYaw < -DRAG.YAW_LIMIT) dragVelYaw = 0;
+    dragYaw = clamp(dragYaw, -DRAG.YAW_LIMIT, DRAG.YAW_LIMIT);
 
     if (modelPivot) {
-        // El giro del usuario se suma al balanceo del puntero, no lo sustituye:
-        // la cámara sigue orbitando y el arrastre es el mando que compensa el
-        // tramo en el que el aparato daba la espalda.
+        // El giro del usuario se suma al balanceo del puntero, no lo sustituye.
         modelPivot.rotation.y = dragYaw + mouseX * 0.25;
         modelPivot.rotation.x = dragPitch + mouseY * 0.15;
         modelPivot.position.y = -0.4 + Math.sin(time * 0.35) * 0.045;
@@ -2812,7 +2936,12 @@ function animate() {
     }
 
     // --- órbita de cámara ---
-    const phi = currentScroll * Math.PI * 2.0;
+    // Con `currentScroll * 2π` la cámara daba la vuelta completa y a mitad del
+    // recorrido quedaba detrás del aparato: se veía la espalda justo cuando la
+    // ficha describía su pantalla. Ahora se balancea dentro de un arco frontal,
+    // así que la cara siempre está a la vista. El arrastre del usuario sigue
+    // pudiendo llevarla más allá: eso es decisión suya, no del recorrido.
+    const phi = Math.sin(currentScroll * Math.PI * 3.0) * ORBIT_MAX;
     const y = 0.35 + Math.sin(currentScroll * Math.PI) * 0.8;
     const radius = 4.4 - Math.sin(currentScroll * Math.PI) * 0.6;
     const x = radius * Math.sin(phi);
@@ -2823,7 +2952,7 @@ function animate() {
     const lookAtXOffset = -0.9 * easeFactor;
     const targetLookAt = new THREE.Vector3(lookAtXOffset, -0.15, 0);
     const targetPos = new THREE.Vector3(x, y, z);
-    camera.position.lerp(targetPos, 0.025);
+    camera.position.lerp(targetPos, REDUCE_MOTION ? 1 : HERO.CAM_LERP);
     camera.lookAt(targetLookAt);
 
     if (shaderUniforms) {
@@ -2894,15 +3023,20 @@ window.addEventListener('mousemove', (event) => {
 
 /* =========================================================
    ARRASTRE PARA GIRAR EL APARATO
-   La cámara recorre una órbita completa a lo largo de la pieza, así que hay
-   un tramo del scroll en el que el aparato se ve por detrás. El giro es
-   acumulativo y NO se recentra al soltar: si el visitante lo pone de frente,
-   se queda de frente, incluso al cambiar de año.
+   Nació como remedio: la cámara daba la vuelta entera y había un tramo en el
+   que el aparato se veía por detrás. Ese tramo ya no existe —la órbita se
+   quedó en un arco frontal—, así que el arrastre pasa de ser un parche a ser
+   exploración: sirve para mirar el perfil, no para rescatar la vista.
+   El giro es acumulativo y NO se recentra al soltar.
    ========================================================= */
 const DRAG = {
     SENSITIVITY: 0.0075,   // radianes por píxel arrastrado
     FRICTION: 0.94,        // frenado de la inercia por fotograma
     PITCH_LIMIT: 0.62,     // ~35°: más allá se ve la tapa y se pierde la silueta
+    /* ~52° a cada lado. Con el balanceo de cámara (±49°) el peor caso deja el
+       aparato de perfil, nunca de espaldas: sin este tope, arrastrando en un
+       mismo sentido se acababa dando la vuelta completa al modelo. */
+    YAW_LIMIT: 0.92,
     THRESHOLD: 3           // px antes de considerar que es un arrastre y no un clic
 };
 let dragYaw = 0, dragPitch = 0;
@@ -2971,6 +3105,10 @@ const modalTitle  = document.getElementById('modal-title');
 const modalYears  = document.getElementById('modal-years');
 const modalSpend  = document.getElementById('modal-spend');
 const modalProv   = document.getElementById('modal-prov');
+const modalCard   = modalEl ? modalEl.querySelector('.modal-card') : null;
+const modalSum    = document.getElementById('modal-sum');
+const modalEvo    = document.getElementById('modal-evo');
+const modalEvoList = document.getElementById('modal-evo-list');
 
 /** Los años que caen dentro de una era, con los mismos cortes que usa la escena. */
 function yearsOfEra(e) {
@@ -3100,6 +3238,26 @@ function openEraModal(e, invoker) {
 
     modalKicker.textContent = era.years;
     modalTitle.textContent = era.era;
+
+    // El color de la era tiñe la barra del bloque de evolución.
+    modalCard.style.setProperty('--modal-glow', era.glow);
+    if (modalSum) modalSum.textContent = era.sum;
+    if (modalEvo) modalEvo.textContent = ERA_EVO[e];
+
+    // Hitos publicitarios año a año: se arman desde AD_EVO por índice real,
+    // así que no puede desincronizarse de lo que muestra la ficha del hero.
+    if (modalEvoList) {
+        modalEvoList.replaceChildren();
+        for (let i = ERA_BOUNDS[e]; i < ERA_BOUNDS[e + 1]; i++) {
+            const li = document.createElement('li');
+            const b = document.createElement('b');
+            b.textContent = String(YEARS[i].y);
+            const t = document.createElement('span');
+            t.textContent = AD_EVO[i];
+            li.append(b, t);
+            modalEvoList.appendChild(li);
+        }
+    }
 
     // Izquierda: los años de la era, cada uno con su aparato y su modelo.
     modalYears.replaceChildren();
