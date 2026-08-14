@@ -2707,6 +2707,15 @@ function fitCard() {
     }
 }
 
+/* Las tipografías llegan por red después del primer pintado. Italiana y Outfit
+   son más altas que las de respaldo, así que la ficha crece cuando entran: la
+   primera medida se tomaba con la fuente equivocada y se quedaba corta —medido:
+   537px de contenido contra un límite de 530, sin ningún escalón aplicado—.
+   Se vuelve a medir cuando el navegador confirma que ya están. */
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => fitCard()).catch(() => {});
+}
+
 /** Releva el contenido del panel: sale, se reescribe, entra. Al ser un único
  *  nodo el que se reescribe, dos años no pueden coexistir en pantalla. */
 function updateYearPanel(s) {
